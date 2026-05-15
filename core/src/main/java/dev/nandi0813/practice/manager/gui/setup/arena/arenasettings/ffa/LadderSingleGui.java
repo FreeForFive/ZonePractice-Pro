@@ -70,6 +70,9 @@ public class LadderSingleGui extends GUI {
             }
 
             int slot = gui.get(1).firstEmpty();
+            if (slot == -1) {
+                break;
+            }
             gui.get(1).setItem(slot, ladderItem);
             ladderSlots.put(slot, ladder.getName());
         }

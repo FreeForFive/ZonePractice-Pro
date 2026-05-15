@@ -1,5 +1,6 @@
 package dev.nandi0813.practice.command.ladder.arguments;
 
+import dev.nandi0813.practice.manager.backend.ConfigManager;
 import dev.nandi0813.practice.manager.backend.LanguageManager;
 import dev.nandi0813.practice.manager.gui.guis.ladder.LadderCreateGui;
 import dev.nandi0813.practice.manager.ladder.LadderManager;
@@ -10,6 +11,8 @@ import java.text.Normalizer;
 
 public enum CreateArg {
     ;
+
+    private static final int MAX_LADDERS = ConfigManager.getInt("SETUP.MAX-LADDERS");
 
     public static void run(Player player, String label, String[] args) {
         if (!player.hasPermission("zpp.setup")) {
@@ -22,8 +25,9 @@ public enum CreateArg {
             return;
         }
 
-        if (LadderManager.getInstance().getLadders().size() == 45) {
-            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.LADDER.ARGUMENTS.CREATE.REACHED-MAX"));
+        if (MAX_LADDERS > 0 && LadderManager.getInstance().getLadders().size() >= MAX_LADDERS) {
+            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.LADDER.ARGUMENTS.CREATE.REACHED-MAX")
+                    .replace("%max%", String.valueOf(MAX_LADDERS)));
             return;
         }
 

@@ -20,6 +20,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.util.UUID;
+
 public class PlayerQuit implements Listener {
 
     @EventHandler ( priority = EventPriority.LOWEST )
@@ -36,6 +38,7 @@ public class PlayerQuit implements Listener {
 
         MessageCommand.latestMessage.remove(player);
         MessageCommand.latestMessage.values().removeIf(target -> target.equals(player));
+        ProfileManager.getInstance().clearPlayerReference(player);
 
         final Profile profile = ProfileManager.getInstance().getProfile(player);
         final Party party = PartyManager.getInstance().getParty(player);
@@ -60,6 +63,10 @@ public class PlayerQuit implements Listener {
             if (ZonePractice.getInstance().isEnabled()) {
                 Bukkit.getScheduler().runTaskLater(ZonePractice.getInstance(), () ->
                         profile.setStatus(ProfileStatus.OFFLINE), 5L);
+
+                UUID uuid = player.getUniqueId();
+                Bukkit.getScheduler().runTaskLater(ZonePractice.getInstance(), () ->
+                        ProfileManager.getInstance().demoteOfflineProfile(uuid), 40L);
             }
         }
     }
@@ -77,12 +84,19 @@ public class PlayerQuit implements Listener {
 
         MessageCommand.latestMessage.remove(player);
         MessageCommand.latestMessage.values().removeIf(target -> target.equals(player));
+        ProfileManager.getInstance().clearPlayerReference(player);
 
         MatchManager.getInstance().invalidateRematchByPlayer(player);
 
         Profile profile = ProfileManager.getInstance().getProfile(player);
         if (profile != null) {
             profile.getActionBar().resetForReconnect();
+
+            if (ZonePractice.getInstance().isEnabled()) {
+                UUID uuid = player.getUniqueId();
+                Bukkit.getScheduler().runTaskLater(ZonePractice.getInstance(), () ->
+                        ProfileManager.getInstance().demoteOfflineProfile(uuid), 40L);
+            }
         }
     }
 

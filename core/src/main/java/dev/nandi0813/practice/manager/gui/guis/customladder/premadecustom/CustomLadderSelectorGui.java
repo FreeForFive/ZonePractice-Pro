@@ -65,6 +65,9 @@ public class CustomLadderSelectorGui extends GUI {
                 }
 
                 int slot = gui.get(1).firstEmpty();
+                if (slot == -1) {
+                    break;
+                }
                 ladderSlots.put(slot, ladder);
                 gui.get(1).setItem(slot, icon);
             }

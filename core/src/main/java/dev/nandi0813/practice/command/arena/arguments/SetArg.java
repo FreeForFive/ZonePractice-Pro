@@ -1,6 +1,7 @@
 package dev.nandi0813.practice.command.arena.arguments;
 
 import dev.nandi0813.practice.command.arena.arguments.Set.IconArg;
+import dev.nandi0813.practice.command.arena.arguments.Set.PartyFfaCenterArg;
 import dev.nandi0813.practice.command.arena.arguments.Set.PortalProtArg;
 import dev.nandi0813.practice.command.arena.arguments.Set.SideBuildLimitArg;
 import org.bukkit.entity.Player;
@@ -25,6 +26,9 @@ public enum SetArg {
                 case "sidebuildlimit":
                     SideBuildLimitArg.run(player, label, args);
                     break;
+                case "partyffacenter":
+                    PartyFfaCenterArg.run(player, label, args);
+                    break;
             }
         } else
             HelpArg.run_setCommand(player, label);
@@ -39,6 +43,7 @@ public enum SetArg {
             arguments.add("icon");
             arguments.add("portalprot");
             arguments.add("sidebuildlimit");
+            arguments.add("partyffacenter");
 
             StringUtil.copyPartialMatches(args[1], arguments, completion);
         } else if (args.length > 2) {
@@ -46,6 +51,7 @@ public enum SetArg {
                 case "icon" -> IconArg.tabComplete(player, args);
                 case "portalprot" -> PortalProtArg.tabComplete(player, args);
                 case "sidebuildlimit" -> SideBuildLimitArg.tabComplete(player, args);
+                case "partyffacenter" -> PartyFfaCenterArg.tabComplete(player, args);
                 default -> completion;
             };
         }

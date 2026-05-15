@@ -29,7 +29,7 @@ public class PlayerJoin implements Listener {
         final Player player = e.getPlayer();
         final UUID uuid = player.getUniqueId();
 
-        Profile profile = ProfileManager.getInstance().getProfile(uuid);
+        Profile profile = ProfileManager.getInstance().getProfile(player);
         if (profile == null)
             profile = ProfileManager.getInstance().newProfile(player, uuid);
 

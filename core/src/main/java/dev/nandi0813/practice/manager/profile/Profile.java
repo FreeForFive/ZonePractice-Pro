@@ -79,7 +79,7 @@ public class Profile {
 
     private RankedBan rankedBan = new RankedBan();
     private ProfileSettingsGui settingsGui;
-    private ActionBar actionBar = new ActionBar(this);
+    private ActionBar actionBar;
 
     // Cosmetics data for armor trims
     private CosmeticsData cosmeticsData = new CosmeticsData();
@@ -88,6 +88,7 @@ public class Profile {
     private PlayerCustomKitSelector playerCustomKitSelector;
     private final List<CustomLadder> customLadders = new ArrayList<>();
     private CustomLadder selectedCustomLadder;
+    private boolean fullDataLoaded = false;
 
     public Profile(UUID uuid, OfflinePlayer player) {
         this.uuid = uuid;
@@ -131,6 +132,7 @@ public class Profile {
     }
 
     public void getData() {
+        this.stats.getLadderStats().clear();
         file.getData();
         stats.getData();
 
@@ -167,6 +169,46 @@ public class Profile {
                 }
             }
         }
+        this.fullDataLoaded = true;
+    }
+
+    public synchronized void loadStatsOnlyData() {
+        this.file.reloadFile();
+        this.stats.getLadderStats().clear();
+
+        if (this.file.getConfig().isLong("join.first"))
+            this.setFirstJoin(this.file.getConfig().getLong("join.first"));
+
+        if (this.file.getConfig().isLong("join.latest"))
+            this.setLastJoin(this.file.getConfig().getLong("join.latest"));
+
+        this.stats.getData();
+        this.fullDataLoaded = false;
+    }
+
+    public synchronized void ensureFullDataLoaded() {
+        if (this.fullDataLoaded) {
+            return;
+        }
+
+        getData();
+    }
+
+    public synchronized void demoteToStatsOnly() {
+        this.settingsGui = null;
+        this.playerCustomKitSelector = null;
+        this.selectedCustomLadder = null;
+        this.customLadders.clear();
+        this.unrankedCustomKits.clear();
+        this.rankedCustomKits.clear();
+        this.ignoredPlayers.clear();
+        this.followTarget = null;
+        this.actionBar = null;
+        this.fullDataLoaded = false;
+    }
+
+    public boolean isFullDataLoaded() {
+        return fullDataLoaded;
     }
 
     public void checkGroup() {
@@ -245,6 +287,14 @@ public class Profile {
             this.playerCustomKitSelector = new PlayerCustomKitSelector(this);
         }
         return this.playerCustomKitSelector;
+    }
+
+    public ActionBar getActionBar() {
+        if (this.actionBar == null) {
+            this.actionBar = new ActionBar(this);
+        }
+
+        return this.actionBar;
     }
 
     public void setSelectedCustomLadder(CustomLadder customLadder) {

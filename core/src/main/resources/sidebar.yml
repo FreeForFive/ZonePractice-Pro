@@ -1,4 +1,4 @@
-VERSION: 5
+VERSION: 6
 
 TITLE: "<gold><b>PRACTICE"
 LOBBY:
@@ -101,6 +101,7 @@ LOBBY:
 ########################################################################
 MATCH:
   ROUND-SYMBOL: "⬤"
+  ROUND-SYMBOL-MAX-ROUNDS: 3 # If wins-needed is above this, show rounds as won/total instead of repeated symbols.
   BED-STATUS:
     NOT-DESTROYED: "<green>✓"
     DESTROYED: "<red>✗"

@@ -43,6 +43,7 @@ public enum InfoArg {
                     .replace("%corner2%", ArenaUtil.convertLocation(arena.getCorner2()))
                     .replace("%position1%", ArenaUtil.convertLocation(arena.getPosition1()))
                     .replace("%position2%", ArenaUtil.convertLocation(arena.getPosition2()))
+                    .replace("%partyFfaCenter%", ArenaUtil.convertLocation(arena.getPartyFfaCenter()))
                     .replace("%status%", arena.isEnabled() ? LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.INFO.STATUS-NAMES.ENABLED") : LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.INFO.STATUS-NAMES.DISABLED"))
             );
         }

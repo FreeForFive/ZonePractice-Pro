@@ -1,4 +1,4 @@
-VERSION: 57
+VERSION: 58
 
 # Mysql database setup.
 MYSQL-DATABASE:
@@ -23,11 +23,23 @@ KNOCKBACK:
     AIR-VERTICAL: 0.93
     HORIZONTAL: 0.82
     VERTICAL: 0.88
+    MAX-AIR-HORIZONTAL: -1.0 # Set <= 0 to disable cap.
+    MAX-AIR-VERTICAL: -1.0 # Set <= 0 to disable cap.
+    MAX-HORIZONTAL: -1.0 # Set <= 0 to disable cap.
+    MAX-VERTICAL: -1.0 # Set <= 0 to disable cap.
   COMBO:
     AIR-HORIZONTAL: 2.8
     AIR-VERTICAL: 2.8
     HORIZONTAL: 2.5
     VERTICAL: 2.5
+    MAX-AIR-HORIZONTAL: 1.35 # Hard cap to avoid launch spikes.
+    MAX-AIR-VERTICAL: 0.62 # Hard cap to avoid launching players too high.
+    MAX-HORIZONTAL: 1.15 # Ground horizontal cap.
+    MAX-VERTICAL: 0.52 # Ground vertical cap.
+#
+# Setup limits
+SETUP:
+  MAX-LADDERS: 0 # Set to 0 or -1 for unlimited ladders.
 #
 # Queue settings
 QUEUE:

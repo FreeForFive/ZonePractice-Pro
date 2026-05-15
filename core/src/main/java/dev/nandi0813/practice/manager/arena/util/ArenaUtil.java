@@ -1,5 +1,6 @@
 package dev.nandi0813.practice.manager.arena.util;
 
+import dev.nandi0813.practice.manager.arena.ArenaManager;
 import dev.nandi0813.practice.manager.arena.arenas.Arena;
 import dev.nandi0813.practice.manager.arena.arenas.ArenaCopy;
 import dev.nandi0813.practice.manager.arena.arenas.FFAArena;
@@ -273,11 +274,18 @@ public enum ArenaUtil {
         org.bukkit.plugin.Plugin plugin = dev.nandi0813.practice.ZonePractice.getInstance();
         for (int cx = minCX; cx <= maxCX; cx++) {
             for (int cz = minCZ; cz <= maxCZ; cz++) {
+                if (ArenaManager.LOAD_CHUNKS) {
+                    ArenaManager.LOADED_CHUNK_KEYS.add(chunkKey(cx, cz));
+                }
                 // addPluginChunkTicket loads the chunk asynchronously if needed
                 // and prevents it from being unloaded — no main-thread stall.
                 world.addPluginChunkTicket(cx, cz, plugin);
             }
         }
+    }
+
+    public static long chunkKey(int cx, int cz) {
+        return ((long) cx << 32) ^ (cz & 0xffffffffL);
     }
 
     public static void setMannequinItemInHand(Mannequin mannequin, ItemStack item, boolean rightHand) {

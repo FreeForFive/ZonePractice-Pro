@@ -58,6 +58,11 @@ public class NametagManager {
     private BukkitTask belowNameRefreshTask;
 
     public void initialize() {
+        if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+            startBelowNameRefreshTask();
+            return;
+        }
+
         TeamPacketBlocker.getInstance().register();
 
         for (Player online : Bukkit.getOnlinePlayers()) {
@@ -80,6 +85,13 @@ public class NametagManager {
     }
 
     public void shutdown() {
+        if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+            stopBelowNameRefreshTask();
+            belowNameUsers.clear();
+            belowNameLines.clear();
+            return;
+        }
+
         for (Player player : Bukkit.getOnlinePlayers()) {
             onPlayerQuit(player);
         }
@@ -610,6 +622,10 @@ public class NametagManager {
     }
 
     private void hideVanillaNametag(Player player) {
+        if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+            return;
+        }
+
         if (player == null) {
             return;
         }

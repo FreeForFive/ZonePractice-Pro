@@ -1,4 +1,4 @@
-VERSION: 41
+VERSION: 42
 
 CONSOLE-NAME: "<red>Console"
 CANT-USE-CONSOLE: "<red>You can't use this command from the console."
@@ -140,6 +140,7 @@ COMMAND:
           - " <red>» <click:suggest_command:'/%label% set buildmax '><hover:show_text:'<gray>Set the maximum build height.'>/%label% set buildmax <arena>"
           - " <red>» <click:suggest_command:'/%label% set deadzone '><hover:show_text:'<gray>Set the deadzone Y level.'>/%label% set deadzone <arena>"
           - " <red>» <click:suggest_command:'/%label% set sidebuildlimit '><hover:show_text:'<gray>Set the side building limit.'>/%label% set sidebuildlimit <arena>"
+          - " <red>» <click:suggest_command:'/%label% set partyffacenter '><hover:show_text:'<gray>Set Party FFA center to your location.'>/%label% set partyffacenter <arena>"
           - "<red><st>------------------------------------------"
       INFO:
         COMMAND-HELP: "<red>/%label% info <name>"
@@ -163,6 +164,7 @@ COMMAND:
           - ""
           - " <gray>» <gold>Player 2 Position: <white>%position1%"
           - " <gray>» <gold>Player 2 Position: <white>%position2%"
+          - " <gray>» <gold>Party FFA Center: <white>%partyFfaCenter%"
           - ""
           - " <gray>» <gold>Status: %status%"
           - "<gray><st>-----------------------------------"
@@ -304,6 +306,14 @@ COMMAND:
         NOT-BUILD: "<red>Arena must be build to set this property."
         INVALID-NUMBER: "<red>Please give a correctly formatted number between 0 and 10"
         SET-SIDEBUILDLIMIT: "<green>You set the side build limit for the arena <yellow>%arena%<green>. Side Build Limit: <red>%sideBuildLimit%"
+      PARTYFFACENTER:
+        COMMAND-HELP: "<red>/%label% set partyffacenter <arena>"
+        ARENA-NOT-EXISTS: "<red>%arena% arena doesn't exists."
+        ARENA-ENABLED: "<red>You can't edit an enabled arena."
+        CANT-EDIT: "<red>You can't edit arenas that have copies. (%arena%)"
+        NO-REGION: "<red>You must set the two corners of the arena first."
+        POS-OUTSIDE-REGION: "<red>The center must be inside the arena cube."
+        SET: "<green>You set the Party FFA center for arena <yellow>%arena%<green>."
   LADDER:
     NO-PERMISSION: "<red>You don't have permission!"
     ARGUMENTS:
@@ -334,7 +344,7 @@ COMMAND:
           - "<red><st>------------------------------------------"
       CREATE:
         COMMAND-HELP: "<red>/%label% create <name>"
-        REACHED-MAX: "<red>The server has reached the maximum number of ladders. (45/45)"
+        REACHED-MAX: "<red>The server has reached the maximum number of ladders. (%max%/%max%)"
       DELETE:
         COMMAND-HELP: "<red>/%label% delete <ladder>"
         NOT-EXISTS: "<red>%ladder% ladder doesn't exists."

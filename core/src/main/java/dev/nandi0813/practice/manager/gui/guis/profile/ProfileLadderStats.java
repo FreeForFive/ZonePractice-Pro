@@ -49,12 +49,14 @@ public class ProfileLadderStats extends GUI {
         {
             Inventory inventory = gui.get(1);
             inventory.clear();
+            ladderSlots.clear();
 
             for (int i = 45; i < 54; i++)
                 inventory.setItem(i, GUIManager.getFILLER_ITEM());
 
             for (NormalLadder ladder : LadderManager.getInstance().getLadders()) {
                 int slot = inventory.firstEmpty();
+                if (slot == -1) break;
 
                 inventory.setItem(slot, getLadderStatItem(ladder));
                 ladderSlots.put(slot, ladder);

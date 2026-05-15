@@ -51,7 +51,9 @@ public class LbWinGui extends GUI {
                 if (!ladder.isEnabled()) continue;
                 if (!ladder.getMatchTypes().contains(MatchType.DUEL)) continue;
 
-                inventory.setItem(inventory.firstEmpty(), LbGuiUtil.createWinLbItem(ladder));
+                int slot = inventory.firstEmpty();
+                if (slot == -1) break;
+                inventory.setItem(slot, LbGuiUtil.createWinLbItem(ladder));
             }
 
             ItemStack fillerItem = GUIFile.getGuiItem("GUIS.STATISTICS.WIN-LEADERBOARD.ICONS.FILLER-ITEM").get();
