@@ -46,8 +46,10 @@ public class SettingsGui extends GUI {
             guiSlot = GuiSlot.SIZE_1;
         else if (ladderType.getSettingTypes().size() <= 14)
             guiSlot = GuiSlot.SIZE_2;
-        else
+        else if (ladderType.getSettingTypes().size() <= 22)
             guiSlot = GuiSlot.SIZE_3;
+        else
+            guiSlot = GuiSlot.SIZE_4;
 
         gui.put(1, InventoryUtil.createInventory(GUIFile.getString("GUIS.SETUP.LADDER.SETTINGS.TITLE").replace("%ladder%", ladder.getName()), (guiSlot.getRows() + 1)));
 
@@ -67,6 +69,10 @@ public class SettingsGui extends GUI {
         // Set the setting items
         int currentItemSlot = 0;
         for (SettingItem settingItem : settingItems) {
+            if (currentItemSlot >= guiSlot.getSlots().size()) {
+                Common.sendConsoleMMMessage("<red>[Ladder Settings GUI] Too many settings for layout: " + ladder.getName());
+                break;
+            }
             int slot = guiSlot.getSlots().get(currentItemSlot);
             currentItemSlot++;
             settingItem.setSlot(slot);
@@ -127,7 +133,8 @@ public class SettingsGui extends GUI {
     public enum GuiSlot {
         SIZE_1(2, new ArrayList<>(Arrays.asList(10, 11, 12, 13, 14, 15, 16))),
         SIZE_2(3, new ArrayList<>(Arrays.asList(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25))),
-        SIZE_3(4, new ArrayList<>(Arrays.asList(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43)));
+        SIZE_3(4, new ArrayList<>(Arrays.asList(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 35))),
+        SIZE_4(5, new ArrayList<>(Arrays.asList(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43)));
 
         private final int rows;
         private final int backSlot;
