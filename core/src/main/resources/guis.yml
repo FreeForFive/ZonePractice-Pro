@@ -2012,8 +2012,14 @@ GUIS:
       LADDER-MANAGER:
         TITLE: "&8Ladder Manager"
         ICONS:
+          PAGE-LEFT:
+            NAME: "&6Go to Page %page%"
+            MATERIAL: ARROW
           BACK-TO:
             NAME: "&cBack to Server Manager"
+            MATERIAL: ARROW
+          PAGE-RIGHT:
+            NAME: "&6Go to Page %page%"
             MATERIAL: ARROW
           LADDER-ICON:
             STATUS-NAMES:
@@ -2179,6 +2185,16 @@ GUIS:
               - ""
               - "&a&lLEFT-CLICK &ato reduce the rounds."
               - "&b&lRIGHT-CLICK &bto increase the rounds."
+          HEARTS:
+            NAME: "&7Hearts: &c%hearts%"
+            MATERIAL: RED_DYE
+            LORE:
+              - ""
+              - "&7Sets the maximum hearts players"
+              - "&7can have in this ladder."
+              - ""
+              - "&a&lLEFT-CLICK &ato reduce hearts."
+              - "&b&lRIGHT-CLICK &bto increase hearts."
           KNOCKBACK:
             NAME: "&eKnockback Modifier"
             MATERIAL: STICK

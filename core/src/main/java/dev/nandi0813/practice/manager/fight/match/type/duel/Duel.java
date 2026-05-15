@@ -141,7 +141,7 @@ public class Duel extends Match implements Team {
                     SoundManager.getInstance().getSound(SoundType.MATCH_PLAYER_TEMP_DEATH).play(this.getPeople());
                 });
                 dev.nandi0813.practice.manager.fight.util.PlayerUtil.clearInventory(player);
-                player.setHealth(20);
+                PlayerUtil.healToMaxHealth(player);
                 break;
 
             case ELIMINATED:
@@ -154,18 +154,18 @@ public class Duel extends Match implements Team {
                     endRound = true;
                     SoundManager.getInstance().getSound(SoundType.MATCH_PLAYER_DEATH).play(this.getPeople());
                     dev.nandi0813.practice.manager.fight.util.PlayerUtil.clearInventory(player);
-                    player.setHealth(20);
+                    PlayerUtil.healToMaxHealth(player);
                 } else if (isScoringLadder()) {
                     // Scoring ladder (like Boxing) - death doesn't end round
                     return;
                 } else {
                     // Default death behavior for standard ladders
                     this.getCurrentStat(player).end(true);
-                    PlayerUtil.setFightPlayer(player);
+                    PlayerUtil.setFightPlayer(player, ladder);
                     if (ladder.isDropInventory())
                         addEntityChange(dev.nandi0813.practice.manager.fight.util.PlayerUtil.dropPlayerInventory(player));
                     dev.nandi0813.practice.manager.fight.util.PlayerUtil.clearInventory(player);
-                    player.setHealth(20);
+                    PlayerUtil.healToMaxHealth(player);
                     SoundManager.getInstance().getSound(SoundType.MATCH_PLAYER_DEATH).play(this.getPeople());
                     endRound = true;
                 }

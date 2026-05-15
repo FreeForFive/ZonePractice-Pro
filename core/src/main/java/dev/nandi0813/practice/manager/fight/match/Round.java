@@ -73,7 +73,7 @@ public abstract class Round extends BukkitRunnable {
         for (Player player : match.getPlayers()) {
             match.teleportPlayer(player);
 
-            PlayerUtil.setFightPlayer(player);
+            PlayerUtil.setFightPlayer(player, match.getLadder());
 
             MatchFightPlayer matchFightPlayer = match.getMatchPlayers().get(player);
             matchFightPlayer.setKitChooserOrKit(match instanceof Team ? ((Team) match).getTeam(player) : TeamEnum.TEAM1);

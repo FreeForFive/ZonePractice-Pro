@@ -42,6 +42,7 @@ public abstract class Ladder {
     protected double attackCooldownModifier = 1.0;
     @Setter
     protected int rounds = 1;
+    protected int hearts = 10;
 
     // Cooldowns
     @Setter
@@ -104,6 +105,7 @@ public abstract class Ladder {
         this.build = ladder.isBuild();
         this.attackCooldownModifier = ladder.getAttackCooldownModifier();
         this.rounds = ladder.getRounds();
+        this.hearts = ladder.getHearts();
         this.enderPearlCooldown = ladder.getEnderPearlCooldown();
         this.goldenAppleCooldown = ladder.getGoldenAppleCooldown();
         this.fireworkRocketCooldown = ladder.getFireworkRocketCooldown();
@@ -124,6 +126,10 @@ public abstract class Ladder {
     }
 
     public abstract List<Arena> getArenas();
+
+    public void setHearts(int hearts) {
+        this.hearts = Math.clamp(hearts, 1, 20);
+    }
 
     public List<Arena> getAvailableArenas() {
         List<Arena> arenas = new ArrayList<>();

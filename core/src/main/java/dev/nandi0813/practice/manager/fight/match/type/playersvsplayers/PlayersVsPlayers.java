@@ -73,7 +73,7 @@ public abstract class PlayersVsPlayers extends Match implements Team {
                     SoundManager.getInstance().getSound(SoundType.MATCH_PLAYER_TEMP_DEATH).play(this.getPeople());
                 });
                 dev.nandi0813.practice.manager.fight.util.PlayerUtil.clearInventory(player);
-                player.setHealth(20);
+                PlayerUtil.healToMaxHealth(player);
                 break;
 
             case ELIMINATED:
@@ -89,7 +89,7 @@ public abstract class PlayersVsPlayers extends Match implements Team {
                         MatchPlayerUtil.hidePlayerPartyGames(player, this.players);
 
                     dev.nandi0813.practice.manager.fight.util.PlayerUtil.clearInventory(player);
-                    player.setHealth(20);
+                    PlayerUtil.healToMaxHealth(player);
                 } else if (isScoringLadder()) {
                     // Scoring ladder (like Boxing) - death doesn't end round
                     return;
@@ -98,7 +98,7 @@ public abstract class PlayersVsPlayers extends Match implements Team {
                     this.getCurrentStat(player).end(true);
                     SoundManager.getInstance().getSound(SoundType.MATCH_PLAYER_DEATH).play(this.getPeople());
 
-                    PlayerUtil.setFightPlayer(player);
+                    PlayerUtil.setFightPlayer(player, ladder);
 
                     if (ladder.isDropInventory())
                         addEntityChange(dev.nandi0813.practice.manager.fight.util.PlayerUtil.dropPlayerInventory(player));
@@ -123,7 +123,7 @@ public abstract class PlayersVsPlayers extends Match implements Team {
                         MatchPlayerUtil.hidePlayerPartyGames(player, this.players);
 
                     dev.nandi0813.practice.manager.fight.util.PlayerUtil.clearInventory(player);
-                    player.setHealth(20);
+                    PlayerUtil.healToMaxHealth(player);
                 }
                 break;
 

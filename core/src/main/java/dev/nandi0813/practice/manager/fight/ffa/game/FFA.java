@@ -145,7 +145,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
         teleportPlayer(player);
         this.sendMessage(LanguageManager.getString("FFA.GAME.PLAYER-JOIN").replace("%player%", player.getName()), true);
 
-        PlayerUtil.setFightPlayer(player);
+        PlayerUtil.setFightPlayer(player, ladder);
         this.addPlayerToBelowName(player);
 
         // Show kit chooser or apply default kit
@@ -162,7 +162,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
             return;
 
         players.put(player, ladder);
-        PlayerUtil.setFightPlayer(player);
+        PlayerUtil.setFightPlayer(player, ladder);
         KitUtil.loadDefaultLadderKit(player, TeamEnum.FFA, ladder);
         dev.nandi0813.practice.manager.fight.util.PlayerUtil.setAttackSpeed(player, ladder.getAttackCooldownModifier());
     }
@@ -258,7 +258,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
         if (arena.isLobbyAfterDeath()) {
             this.removePlayer(player);
         } else {
-            PlayerUtil.setFightPlayer(player);
+            PlayerUtil.setFightPlayer(player, players.get(player));
             applySelectedOrDefaultKit(player);
             dev.nandi0813.practice.manager.fight.util.PlayerUtil.setAttackSpeed(player, players.get(player).getAttackCooldownModifier());
 

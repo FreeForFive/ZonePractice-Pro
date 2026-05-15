@@ -67,7 +67,7 @@ public class Sumo extends NormalLadder implements LadderHandle {
 
         // For all other damage types, nullify damage and keep player at full health
         e.setDamage(0);
-        player.setHealth(20);
+        dev.nandi0813.practice.util.playerutil.PlayerUtil.healToMaxHealth(player);
     }
 
 }

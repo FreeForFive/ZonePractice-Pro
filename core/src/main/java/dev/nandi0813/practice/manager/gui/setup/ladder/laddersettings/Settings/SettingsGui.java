@@ -127,7 +127,7 @@ public class SettingsGui extends GUI {
     public enum GuiSlot {
         SIZE_1(2, new ArrayList<>(Arrays.asList(10, 11, 12, 13, 14, 15, 16))),
         SIZE_2(3, new ArrayList<>(Arrays.asList(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25))),
-        SIZE_3(4, new ArrayList<>(Arrays.asList(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 35, 36)));
+        SIZE_3(4, new ArrayList<>(Arrays.asList(10, 11, 12, 13, 14, 15, 16, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, 31, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43)));
 
         private final int rows;
         private final int backSlot;
@@ -181,6 +181,9 @@ public class SettingsGui extends GUI {
 
         if (settingTypes.contains(SettingType.ROUNDS))
             settingItems.add(new RoundsItem(this, ladder));
+
+        if (settingTypes.contains(SettingType.HEARTS))
+            settingItems.add(new HeartsItem(this, ladder));
 
         if (settingTypes.contains(SettingType.RESPAWN_TIME))
             settingItems.add(new TempRespawnTimeItem(this, ladder));
