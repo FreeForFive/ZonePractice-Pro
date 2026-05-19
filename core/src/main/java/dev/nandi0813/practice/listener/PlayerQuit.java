@@ -11,6 +11,7 @@ import dev.nandi0813.practice.manager.profile.ProfileManager;
 import dev.nandi0813.practice.manager.profile.enums.ProfileStatus;
 import dev.nandi0813.practice.manager.server.ServerManager;
 import dev.nandi0813.practice.util.cooldown.PlayerCooldown;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,7 +26,7 @@ public class PlayerQuit implements Listener {
 
     @EventHandler ( priority = EventPriority.LOWEST )
     public void onPlayerQuit(PlayerQuitEvent e) {
-        e.setQuitMessage(null);
+        e.quitMessage(Component.empty());
         final Player player = e.getPlayer();
         NametagManager.getInstance().onPlayerQuit(player);
         ServerManager.getInstance().onPlayerQuit(player);

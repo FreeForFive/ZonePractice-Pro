@@ -57,7 +57,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class ZonePractice extends JavaPlugin {
 
@@ -78,7 +77,6 @@ public final class ZonePractice extends JavaPlugin {
 
     // BStats
     private Metrics metrics;
-    private final AtomicBoolean telemetryListenerRegistered = new AtomicBoolean(false);
 
     public static final ErrorTracker ERROR_TRACKER = ErrorTracker.contextAware();
     private final BukkitMetrics faststats_metrics = BukkitMetrics.factory()
