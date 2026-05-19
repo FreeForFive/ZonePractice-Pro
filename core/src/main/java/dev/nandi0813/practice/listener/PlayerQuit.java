@@ -10,7 +10,6 @@ import dev.nandi0813.practice.manager.profile.Profile;
 import dev.nandi0813.practice.manager.profile.ProfileManager;
 import dev.nandi0813.practice.manager.profile.enums.ProfileStatus;
 import dev.nandi0813.practice.manager.server.ServerManager;
-import dev.nandi0813.practice.telemetry.transport.stats.PracticeStatsTelemetryLogger;
 import dev.nandi0813.practice.util.cooldown.PlayerCooldown;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -52,7 +51,6 @@ public class PlayerQuit implements Listener {
             profile.getActionBar().resetForReconnect();
 
             profile.setLastJoin(System.currentTimeMillis());
-            PracticeStatsTelemetryLogger.markDirty(profile);
 
             // Check how many custom kits the player is allowed to save.
             int customKitPerm = profile.getCustomKitPerm();

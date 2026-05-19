@@ -31,7 +31,6 @@ import dev.nandi0813.practice.manager.profile.Profile;
 import dev.nandi0813.practice.manager.profile.ProfileManager;
 import dev.nandi0813.practice.manager.profile.enums.ProfileStatus;
 import dev.nandi0813.practice.manager.spectator.SpectatorManager;
-import dev.nandi0813.practice.telemetry.transport.stats.PracticeStatsTelemetryLogger;
 import dev.nandi0813.practice.util.Common;
 import dev.nandi0813.practice.util.Cuboid;
 import dev.nandi0813.practice.util.PermanentConfig;
@@ -284,11 +283,9 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
             if (killer != null) {
                 Profile killerProfile = matchPlayers.get(killer).getProfile();
                 killerProfile.getStats().getLadderStat((NormalLadder) ladder).increaseKills();
-                PracticeStatsTelemetryLogger.markDirty(killerProfile);
             }
             Profile deadProfile = matchPlayers.get(player).getProfile();
             deadProfile.getStats().getLadderStat((NormalLadder) ladder).increaseDeaths();
-            PracticeStatsTelemetryLogger.markDirty(deadProfile);
         }
 
         playDeathEffect(killer, player);
