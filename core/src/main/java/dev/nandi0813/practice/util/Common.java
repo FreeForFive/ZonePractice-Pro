@@ -29,15 +29,7 @@ public enum Common {
     }
 
     public static void sendMMMessage(Player player, String line) {
-        if (line == null) {
-            return;
-        }
-
-        if (line.contains("&") || line.contains("§")) {
-            line = StringUtil.legacyColorToMiniMessage(line);
-        }
-
-        if (line.isEmpty()) {
+        if (line == null || line.isEmpty()) {
             return;
         }
 
@@ -45,15 +37,16 @@ public enum Common {
             line = PlaceholderAPI.setPlaceholders(player, line);
         }
 
-        send(player, ZonePractice.getMiniMessage().deserialize(line));
+        send(player, ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(line)));
     }
 
     public static void sendConsoleMMMessage(String string) {
-        send(ZonePractice.getInstance().getServer().getConsoleSender(), ZonePractice.getMiniMessage().deserialize(string));
+        send(ZonePractice.getInstance().getServer().getConsoleSender(), ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(string)));
     }
 
     public static Component deserializeMiniMessage(String line) {
-        return ZonePractice.getMiniMessage().deserialize(line);
+        if (line == null || line.isEmpty()) return Component.empty();
+        return ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(line));
     }
 
     public static String serializeComponentToLegacyString(Component component) {
@@ -61,35 +54,29 @@ public enum Common {
     }
 
     public static String mmToNormal(String line) {
-        if (line.contains("&") || line.contains("§")) {
-            line = StringUtil.legacyColorToMiniMessage(line);
-        }
-
         return StringUtil.CC(serializeComponentToLegacyString(deserializeMiniMessage(line)));
     }
 
     public static String serializeNormalToMMString(String normalString) {
-        String normalized = normalString.replace('&', LegacyComponentSerializer.SECTION_CHAR);
-        Component component = LegacyComponentSerializer.legacySection().deserialize(normalized);
-        return ZonePractice.getMiniMessage().serialize(component);
+        return StringUtil.legacyToMiniMessage(normalString);
     }
 
     public static String colorize(String message) {
-        return StringUtil.CC(message);
+        return serializeComponentToLegacyString(deserializeMiniMessage(message));
     }
 
     public static Component legacyToComponent(String message) {
         if (message == null) {
             return Component.empty();
         }
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(message);
+        return ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(message));
     }
 
     public static String stripLegacyColor(String message) {
         if (message == null || message.isEmpty()) {
             return "";
         }
-        Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(message);
+        Component component = ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(message));
         return PlainTextComponentSerializer.plainText().serialize(component);
     }
 

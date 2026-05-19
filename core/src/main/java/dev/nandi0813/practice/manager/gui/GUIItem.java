@@ -124,14 +124,14 @@ public class GUIItem {
 
     /**
      * Parses a raw name/lore string into a {@link net.kyori.adventure.text.Component},
-     * supporting all color formats: legacy {@code &c}, hex {@code &#RRGGBB},
-     * Bungeecord hex {@code &x&R&R&G&G&B&B}, and MiniMessage tags {@code <red>}.
+     * supporting all color formats: legacy {@code <red>}, hex {@code &#RRGGBB},
+     * Bungeecord hex {@code &x<reset><reset>&G&G<aqua><aqua>}, and MiniMessage tags {@code <red>}.
      */
     private static net.kyori.adventure.text.Component parseColor(String raw) {
         if (raw == null || raw.isEmpty()) return net.kyori.adventure.text.Component.empty();
         // Explicitly mark italic as false so Minecraft's default item-name italic doesn't apply.
         // Users can still opt back in by writing <italic> in their config.
-        return ZonePractice.getMiniMessage().deserialize(StringUtil.translateColorsToMiniMessage(raw))
+        return ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(raw))
                 .decorationIfAbsent(net.kyori.adventure.text.format.TextDecoration.ITALIC,
                         net.kyori.adventure.text.format.TextDecoration.State.FALSE);
     }
