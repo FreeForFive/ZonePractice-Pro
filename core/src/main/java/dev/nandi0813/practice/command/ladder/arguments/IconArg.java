@@ -1,5 +1,6 @@
 package dev.nandi0813.practice.command.ladder.arguments;
 
+import dev.nandi0813.practice.manager.backend.ConfigManager;
 import dev.nandi0813.practice.manager.backend.LanguageManager;
 import dev.nandi0813.practice.manager.fight.util.PlayerUtil;
 import dev.nandi0813.practice.manager.gui.GUIManager;
@@ -37,7 +38,7 @@ public enum IconArg {
             return;
         }
 
-        if (ladder.isEnabled()) {
+        if (ladder.isEnabled() && !ConfigManager.getBoolean("SETUP.ALLOW-ICON-EDIT-WHILE-ENABLED")) {
             Common.sendMMMessage(player, LanguageManager.getString("COMMAND.LADDER.ARGUMENTS.ICON.LADDER-ENABLED").replace("%ladder%", ladder.getDisplayName()));
             return;
         }

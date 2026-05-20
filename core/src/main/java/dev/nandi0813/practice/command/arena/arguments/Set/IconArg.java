@@ -2,6 +2,7 @@ package dev.nandi0813.practice.command.arena.arguments.Set;
 
 import dev.nandi0813.practice.manager.arena.ArenaManager;
 import dev.nandi0813.practice.manager.arena.arenas.interfaces.DisplayArena;
+import dev.nandi0813.practice.manager.backend.ConfigManager;
 import dev.nandi0813.practice.manager.backend.LanguageManager;
 import dev.nandi0813.practice.manager.fight.util.PlayerUtil;
 import dev.nandi0813.practice.manager.gui.GUIManager;
@@ -36,7 +37,7 @@ public enum IconArg {
             return;
         }
 
-        if (arena.isEnabled()) {
+        if (arena.isEnabled() && !ConfigManager.getBoolean("SETUP.ALLOW-ICON-EDIT-WHILE-ENABLED")) {
             Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.ICON.CANT-EDIT").replace("%arena%", arena.getName()));
             return;
         }

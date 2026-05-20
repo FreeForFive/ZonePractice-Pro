@@ -1,4 +1,4 @@
-VERSION: 59
+VERSION: 60
 
 # Mysql database setup.
 MYSQL-DATABASE:
@@ -40,6 +40,8 @@ KNOCKBACK:
 # Setup limits
 SETUP:
   MAX-LADDERS: 0 # Set to 0 or -1 for unlimited ladders.
+  ALLOW-ICON-EDIT-WHILE-ENABLED: false # If true, admins can use /arena set icon and /ladder set icon even while enabled.
+  PRESERVE-CUSTOM-KITS-ON-LADDER-DISABLE: false # If true, disabling a ladder keeps player custom kits for that ladder.
 #
 # Queue settings
 QUEUE:
