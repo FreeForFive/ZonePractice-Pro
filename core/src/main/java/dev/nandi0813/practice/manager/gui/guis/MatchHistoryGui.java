@@ -7,6 +7,7 @@ import dev.nandi0813.practice.manager.gui.GUIType;
 import dev.nandi0813.practice.manager.matchhistory.MatchHistoryEntry;
 import dev.nandi0813.practice.util.Common;
 import dev.nandi0813.practice.util.InventoryUtil;
+import dev.nandi0813.practice.util.ItemCreateUtil;
 import dev.nandi0813.practice.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -15,10 +16,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -191,14 +194,8 @@ public class MatchHistoryGui extends GUI {
     }
 
     private ItemStack buildSkull(UUID uuid, String name) {
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        if (skullMeta != null) {
-            OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(uuid);
-            skullMeta.setOwningPlayer(op);
-            skull.setItemMeta(skullMeta);
-        }
-        return skull;
+        OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(uuid);
+        return ItemCreateUtil.getPlayerHead(op);
     }
 
     private ItemStack buildFillerItem() {

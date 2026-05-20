@@ -1,10 +1,13 @@
 package dev.nandi0813.practice.util;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import dev.nandi0813.practice.ZonePractice;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -148,7 +151,14 @@ public class ItemCreateUtil {
     public static ItemStack getPlayerHead(OfflinePlayer player) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) item.getItemMeta();
-        if (meta != null) meta.setOwningPlayer(player);
+        if (meta != null && player != null) {
+            PlayerProfile profile = Bukkit.createProfile(player.getUniqueId(), player.getName());
+            Player onlinePlayer = player.getPlayer();
+            if (onlinePlayer != null) {
+                profile = onlinePlayer.getPlayerProfile();
+            }
+            meta.setPlayerProfile(profile);
+        }
         item.setItemMeta(meta);
         return item;
     }
