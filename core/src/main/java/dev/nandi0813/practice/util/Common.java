@@ -95,11 +95,25 @@ public enum Common {
         return serializeComponentToLegacyString(itemMeta.displayName());
     }
 
+    public static String getItemDisplayNameMiniMessage(ItemMeta itemMeta) {
+        if (itemMeta == null || !itemMeta.hasDisplayName() || itemMeta.displayName() == null) {
+            return "";
+        }
+        return ZonePractice.getMiniMessage().serialize(itemMeta.displayName());
+    }
+
     public static String getItemDisplayName(ItemStack itemStack) {
         if (itemStack == null || !itemStack.hasItemMeta()) {
             return "";
         }
         return getItemDisplayName(itemStack.getItemMeta());
+    }
+
+    public static String getItemDisplayNameMiniMessage(ItemStack itemStack) {
+        if (itemStack == null || !itemStack.hasItemMeta()) {
+            return "";
+        }
+        return getItemDisplayNameMiniMessage(itemStack.getItemMeta());
     }
 
     public static short getItemDamage(ItemStack itemStack) {

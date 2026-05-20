@@ -145,11 +145,12 @@ public abstract class Ladder {
 
         this.icon = icon.clone();
 
-        String iconDisplayName = Common.getItemDisplayName(icon);
-        if (!iconDisplayName.isBlank())
-            this.displayName = Common.serializeNormalToMMString(iconDisplayName);
-        else
+        String iconDisplayName = Common.getItemDisplayNameMiniMessage(icon);
+        if (!iconDisplayName.isBlank()) {
+            this.displayName = iconDisplayName;
+        } else {
             this.displayName = name;
+        }
     }
 
     public ItemStack getIcon() {
