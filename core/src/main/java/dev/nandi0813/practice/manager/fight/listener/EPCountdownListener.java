@@ -5,7 +5,6 @@ import dev.nandi0813.practice.manager.fight.ffa.game.FFA;
 import dev.nandi0813.practice.manager.fight.match.Match;
 import dev.nandi0813.practice.manager.fight.match.MatchManager;
 import dev.nandi0813.practice.manager.fight.match.enums.RoundStatus;
-import dev.nandi0813.practice.manager.fight.util.ModernItemCooldownHandler;
 import io.papermc.paper.event.player.PlayerItemCooldownEvent;
 import org.bukkit.Material;
 import org.bukkit.entity.EnderPearl;
@@ -39,6 +38,11 @@ public class EPCountdownListener implements Listener {
 
         Match match = MatchManager.getInstance().getLiveMatchByPlayer(player);
         if (match != null) {
+            if (!match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE)) {
+                e.setCancelled(true);
+                return;
+            }
+
             double duration = match.getLadder().getEnderPearlCooldown();
             if (duration <= 0) {
                 e.setCancelled(true);
@@ -49,7 +53,7 @@ public class EPCountdownListener implements Listener {
         }
 
         FFA ffa = FFAManager.getInstance().getFFAByPlayer(player);
-        if (ffa != null) {
+        if (ffa != null && ffa.getPlayers().containsKey(player)) {
             double duration = ffa.getPlayers().get(player).getEnderPearlCooldown();
             if (duration <= 0) {
                 e.setCancelled(true);
@@ -91,12 +95,6 @@ public class EPCountdownListener implements Listener {
 
         FFA ffa = FFAManager.getInstance().getFFAByPlayer(player);
         if (ffa != null) {
-            double duration = ffa.getPlayers().get(player).getEnderPearlCooldown();
-            if (duration <= 0) {
-                return;
-            }
-
-            ModernItemCooldownHandler.handleEnderPearl(player, duration, e);
             return;
         }
 
@@ -106,13 +104,6 @@ public class EPCountdownListener implements Listener {
                 e.setCancelled(true);
                 return;
             }
-
-            double duration = match.getLadder().getEnderPearlCooldown();
-            if (duration <= 0) {
-                return;
-            }
-
-            ModernItemCooldownHandler.handleEnderPearl(player, duration, e);
         }
     }
 
