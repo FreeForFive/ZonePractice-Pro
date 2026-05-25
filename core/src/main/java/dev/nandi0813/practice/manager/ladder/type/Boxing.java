@@ -133,7 +133,7 @@ public class Boxing extends NormalLadder implements CustomConfig, LadderHandle, 
 
         if (match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE)) {
             e.setDamage(0);
-            player.setHealth(20);
+            dev.nandi0813.practice.util.playerutil.PlayerUtil.healToMaxHealth(player);
         }
     }
 

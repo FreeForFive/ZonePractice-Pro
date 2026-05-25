@@ -9,13 +9,20 @@ public enum KnockbackUtil {
 
     public static void setPlayerKnockback(Entity target, Entity attacker, KnockbackType knockbackType) {
         Vector currentVelocity = target.getVelocity().clone();
+        boolean targetOnGround = target.isOnGround();
 
-        double horizontalScale = target.isOnGround()
+        double horizontalScale = targetOnGround
                 ? knockbackType.getHorizontal()
                 : knockbackType.getAirhorizontal();
-        double verticalScale = target.isOnGround()
+        double verticalScale = targetOnGround
                 ? knockbackType.getVertical()
                 : knockbackType.getAirvertical();
+        double maxHorizontal = targetOnGround
+                ? knockbackType.getMaxHorizontal()
+                : knockbackType.getMaxAirhorizontal();
+        double maxVertical = targetOnGround
+                ? knockbackType.getMaxVertical()
+                : knockbackType.getMaxAirvertical();
 
         Vector awayFromAttacker = target.getLocation().toVector().subtract(attacker.getLocation().toVector());
         awayFromAttacker.setY(0);
@@ -41,6 +48,12 @@ public enum KnockbackUtil {
         double appliedVertical = Math.max(0.0D, currentVelocity.getY()) * verticalScale;
         if (appliedVertical < 0.08D) {
             appliedVertical = 0.08D * verticalScale;
+        }
+        if (maxHorizontal > 0.0D) {
+            appliedHorizontal = Math.min(appliedHorizontal, maxHorizontal);
+        }
+        if (maxVertical > 0.0D) {
+            appliedVertical = Math.min(appliedVertical, maxVertical);
         }
 
         Vector adjustedVelocity = new Vector(

@@ -31,6 +31,7 @@ public class NametagManager {
     private static final boolean LOW_HEALTH_RATIO = dev.nandi0813.practice.manager.backend.ConfigManager.getBoolean("MATCH-SETTINGS.HEALTH-BELOW-NAME.DECIMAL-HEART-INDICATOR.LOW-HEALTH-DECIMAL-RATIO");
     private static final double LOW_HEALTH_THRESHOLD = dev.nandi0813.practice.manager.backend.ConfigManager.getDouble("MATCH-SETTINGS.HEALTH-BELOW-NAME.LOW-HEALTH-THRESHOLD") * 2.0;
     private static final double CONFIG_SCALE = dev.nandi0813.practice.manager.backend.ConfigManager.getDouble("MATCH-SETTINGS.HEALTH-BELOW-NAME.SCALE");
+    private static final String HEALTH_SYMBOL = dev.nandi0813.practice.manager.backend.ConfigManager.getString("MATCH-SETTINGS.HEALTH-BELOW-NAME.SYMBOL");
 
     private static final String BELOW_NAME_OBJECTIVE = "ZPP_BELOW";
 
@@ -58,6 +59,11 @@ public class NametagManager {
     private BukkitTask belowNameRefreshTask;
 
     public void initialize() {
+        if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+            startBelowNameRefreshTask();
+            return;
+        }
+
         TeamPacketBlocker.getInstance().register();
 
         for (Player online : Bukkit.getOnlinePlayers()) {
@@ -80,6 +86,13 @@ public class NametagManager {
     }
 
     public void shutdown() {
+        if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
+            stopBelowNameRefreshTask();
+            belowNameUsers.clear();
+            belowNameLines.clear();
+            return;
+        }
+
         for (Player player : Bukkit.getOnlinePlayers()) {
             onPlayerQuit(player);
         }
@@ -473,11 +486,11 @@ public class NametagManager {
 
         if (DECIMAL_ALWAYS_SHOW || (LOW_HEALTH_RATIO && health < LOW_HEALTH_THRESHOLD)) {
             return Component.text(String.format(java.util.Locale.US, "%.1f", displayHealth), NamedTextColor.WHITE)
-                    .append(Component.text("♥", heartColor));
+                    .append(Component.text(HEALTH_SYMBOL, heartColor));
         }
 
-        return Component.text((int) Math.ceil(displayHealth) + " ", NamedTextColor.WHITE)
-                .append(Component.text("♥", heartColor));
+        return Component.text((int) Math.ceil(displayHealth), NamedTextColor.WHITE)
+                .append(Component.text(HEALTH_SYMBOL, heartColor));
     }
 
     private boolean isSaturated(Player player) {
@@ -597,19 +610,11 @@ public class NametagManager {
         }
     }
 
-    private void reapplyHideTeamLater(Player player) {
-        if (player == null) {
+    private void hideVanillaNametag(Player player) {
+        if (!PermanentConfig.NAMETAG_MANAGEMENT_ENABLED) {
             return;
         }
 
-        Bukkit.getScheduler().runTaskLater(ZonePractice.getInstance(), () -> {
-            if (player.isOnline()) {
-                hideVanillaNametag(player);
-            }
-        }, 1L);
-    }
-
-    private void hideVanillaNametag(Player player) {
         if (player == null) {
             return;
         }

@@ -51,7 +51,9 @@ public class LbEloGui extends GUI {
                 if (!ladder.isRanked()) continue;
                 if (!ladder.getMatchTypes().contains(MatchType.DUEL)) continue;
 
-                inventory.setItem(inventory.firstEmpty(), LbGuiUtil.createEloLbItem(ladder));
+                int slot = inventory.firstEmpty();
+                if (slot == -1) break;
+                inventory.setItem(slot, LbGuiUtil.createEloLbItem(ladder));
             }
 
             ItemStack fillerItem = GUIFile.getGuiItem("GUIS.STATISTICS.ELO-LEADERBOARD.ICONS.FILLER-ITEM").get();

@@ -8,9 +8,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
-public enum StringUtil {
-    ;
+public final class StringUtil {
+
+    private StringUtil() {}
 
     public static String CC(String string) {
         if (string == null) {
@@ -25,6 +27,70 @@ public enum StringUtil {
             list.add(CC(string));
         }
         return list;
+    }
+
+    private static final Map<Character, String> LEGACY_TO_MM = Map.ofEntries(
+            Map.entry('0', "black"),
+            Map.entry('1', "dark_blue"),
+            Map.entry('2', "dark_green"),
+            Map.entry('3', "dark_aqua"),
+            Map.entry('4', "dark_red"),
+            Map.entry('5', "dark_purple"),
+            Map.entry('6', "gold"),
+            Map.entry('7', "gray"),
+            Map.entry('8', "dark_gray"),
+            Map.entry('9', "blue"),
+            Map.entry('a', "green"),
+            Map.entry('b', "aqua"),
+            Map.entry('c', "red"),
+            Map.entry('d', "light_purple"),
+            Map.entry('e', "yellow"),
+            Map.entry('f', "white"),
+            Map.entry('k', "obfuscated"),
+            Map.entry('l', "bold"),
+            Map.entry('m', "strikethrough"),
+            Map.entry('n', "underlined"),
+            Map.entry('o', "italic"),
+            Map.entry('r', "reset")
+    );
+
+    public static String legacyToMiniMessage(String text) {
+        if (text == null || text.isEmpty()) return text;
+
+        StringBuilder out = new StringBuilder();
+
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+
+            if ((c == '&' || c == '§') && i + 1 < text.length()) {
+                char code = Character.toLowerCase(text.charAt(++i));
+
+                // hex
+                if (code == '#' && i + 6 < text.length()) {
+                    String hex = text.substring(i + 1, i + 7);
+
+                    if (hex.matches("[0-9a-fA-F]{6}")) {
+                        out.append("<#").append(hex).append(">");
+                        i += 6;
+                        continue;
+                    }
+                }
+
+                // legacy
+                String tag = LEGACY_TO_MM.get(code);
+                if (tag != null) {
+                    out.append('<').append(tag).append('>');
+                    continue;
+                }
+
+                out.append(c).append(code);
+                continue;
+            }
+
+            out.append(c);
+        }
+
+        return out.toString();
     }
 
     public static String replaceSecondString(String string, double seconds) {
@@ -70,94 +136,4 @@ public enum StringUtil {
     public static String getNormalizedName(String name) {
         return StringUtils.capitalize(name.replace("_", " ").toLowerCase());
     }
-
-
-    /**
-     * Converts a string that may contain legacy color codes (both & and § prefix)
-     * as well as hex color codes in the formats &#RRGGBB, &x&R&R&G&G&B&B,
-     * §x§R§R§G§G§B§B, and #RRGGBB into their MiniMessage equivalents.
-     *
-     * This is the correct entry-point for strings returned by PlaceholderAPI,
-     * since PAPI expansions (e.g. LuckPerms) typically produce legacy-coded strings.
-     */
-    public static String translateColorsToMiniMessage(String string) {
-        if (string == null || string.isEmpty()) return string;
-
-        // ── 1. §x§R§R§G§G§B§B  (Bungeecord/vanilla hex, section-prefixed) ──
-        // Pattern: §x followed by six §<char> pairs
-        string = string.replaceAll(
-                "§x§([0-9A-Fa-f])§([0-9A-Fa-f])§([0-9A-Fa-f])§([0-9A-Fa-f])§([0-9A-Fa-f])§([0-9A-Fa-f])",
-                "<#$1$2$3$4$5$6>"
-        );
-
-        // ── 2. &x&R&R&G&G&B&B  (same but ampersand-prefixed) ──
-        string = string.replaceAll(
-                "&x&([0-9A-Fa-f])&([0-9A-Fa-f])&([0-9A-Fa-f])&([0-9A-Fa-f])&([0-9A-Fa-f])&([0-9A-Fa-f])",
-                "<#$1$2$3$4$5$6>"
-        );
-
-        // ── 3. &#RRGGBB  (common shorthand used by many plugins) ──
-        string = string.replaceAll("&#([0-9A-Fa-f]{6})", "<#$1>");
-
-        // ── 4. §#RRGGBB  (section variant of the shorthand) ──
-        string = string.replaceAll("§#([0-9A-Fa-f]{6})", "<#$1>");
-
-        // ── 5. Standalone #RRGGBB at word boundary (bare hex, used by some expansions) ──
-        // ':' is excluded from the lookbehind so that MiniMessage gradient/transition tags
-        // such as <gradient:#FF0000:#00FF00> are preserved — the '#' tokens there are always
-        // preceded by ':' and must NOT be re-wrapped in <#…>.
-        string = string.replaceAll("(?<![&§<:])#([0-9A-Fa-f]{6})(?![0-9A-Fa-f>])", "<#$1>");
-
-        // ── 6. Standard legacy & and § codes ──
-        return legacyColorToMiniMessage(string);
-    }
-
-    public static String legacyColorToMiniMessage(String string) {
-        return string
-                .replace("&0", "<black>")
-                .replace("&1", "<dark_blue>")
-                .replace("&2", "<dark_green>")
-                .replace("&3", "<dark_aqua>")
-                .replace("&4", "<dark_red>")
-                .replace("&5", "<dark_purple>")
-                .replace("&6", "<gold>")
-                .replace("&7", "<gray>")
-                .replace("&8", "<dark_gray>")
-                .replace("&9", "<blue>")
-                .replace("&a", "<green>")
-                .replace("&b", "<aqua>")
-                .replace("&c", "<red>")
-                .replace("&d", "<light_purple>")
-                .replace("&e", "<yellow>")
-                .replace("&f", "<white>")
-                .replace("&k", "<obf>")
-                .replace("&l", "<bold>")
-                .replace("&m", "<st>")
-                .replace("&n", "<u>")
-                .replace("&o", "<i>")
-                .replace("&r", "<reset>")
-                .replace("§0", "<black>")
-                .replace("§1", "<dark_blue>")
-                .replace("§2", "<dark_green>")
-                .replace("§3", "<dark_aqua>")
-                .replace("§4", "<dark_red>")
-                .replace("§5", "<dark_purple>")
-                .replace("§6", "<gold>")
-                .replace("§7", "<gray>")
-                .replace("§8", "<dark_gray>")
-                .replace("§9", "<blue>")
-                .replace("§a", "<green>")
-                .replace("§b", "<aqua>")
-                .replace("§c", "<red>")
-                .replace("§d", "<light_purple>")
-                .replace("§e", "<yellow>")
-                .replace("§f", "<white>")
-                .replace("§k", "<obf>")
-                .replace("§l", "<bold>")
-                .replace("§m", "<st>")
-                .replace("§n", "<u>")
-                .replace("§o", "<i>")
-                .replace("§r", "<reset>");
-    }
-
 }

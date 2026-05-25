@@ -110,7 +110,7 @@ public class TempKillPlayer extends BukkitRunnable {
         dev.nandi0813.practice.manager.fight.util.PlayerUtil.setCollidesWithEntities(player, true);
 
         match.teleportPlayer(player);
-        PlayerUtil.setFightPlayer(player);
+        PlayerUtil.setFightPlayer(player, match.getLadder());
         match.getMatchPlayers().get(player).setKitChooserOrKit(playerTeam);
     }
 

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Getter
 public class Duel extends Match implements Team {
@@ -108,9 +109,11 @@ public class Duel extends Match implements Team {
 
     @Override
     public int getWonRounds(Player player) {
+        UUID playerUuid = player.getUniqueId();
         int wonRounds = 0;
         for (Round round : this.rounds.values()) {
-            if (((DuelRound) round).getRoundWinner() == player)
+            Player winner = ((DuelRound) round).getRoundWinner();
+            if (winner != null && winner.getUniqueId().equals(playerUuid))
                 wonRounds++;
         }
         return wonRounds;
@@ -141,7 +144,7 @@ public class Duel extends Match implements Team {
                     SoundManager.getInstance().getSound(SoundType.MATCH_PLAYER_TEMP_DEATH).play(this.getPeople());
                 });
                 dev.nandi0813.practice.manager.fight.util.PlayerUtil.clearInventory(player);
-                player.setHealth(20);
+                PlayerUtil.healToMaxHealth(player);
                 break;
 
             case ELIMINATED:
@@ -154,18 +157,18 @@ public class Duel extends Match implements Team {
                     endRound = true;
                     SoundManager.getInstance().getSound(SoundType.MATCH_PLAYER_DEATH).play(this.getPeople());
                     dev.nandi0813.practice.manager.fight.util.PlayerUtil.clearInventory(player);
-                    player.setHealth(20);
+                    PlayerUtil.healToMaxHealth(player);
                 } else if (isScoringLadder()) {
                     // Scoring ladder (like Boxing) - death doesn't end round
                     return;
                 } else {
                     // Default death behavior for standard ladders
                     this.getCurrentStat(player).end(true);
-                    PlayerUtil.setFightPlayer(player);
+                    PlayerUtil.setFightPlayer(player, ladder);
                     if (ladder.isDropInventory())
                         addEntityChange(dev.nandi0813.practice.manager.fight.util.PlayerUtil.dropPlayerInventory(player));
                     dev.nandi0813.practice.manager.fight.util.PlayerUtil.clearInventory(player);
-                    player.setHealth(20);
+                    PlayerUtil.healToMaxHealth(player);
                     SoundManager.getInstance().getSound(SoundType.MATCH_PLAYER_DEATH).play(this.getPeople());
                     endRound = true;
                 }

@@ -1,6 +1,5 @@
 package dev.nandi0813.practice.manager.sidebar.adapter;
 
-import dev.nandi0813.practice.ZonePractice;
 import dev.nandi0813.practice.manager.fight.ffa.game.FFA;
 import dev.nandi0813.practice.manager.fight.match.Match;
 import dev.nandi0813.practice.manager.fight.match.Round;
@@ -16,9 +15,11 @@ import dev.nandi0813.practice.manager.fight.util.Stats.Statistic;
 import dev.nandi0813.practice.manager.profile.Profile;
 import dev.nandi0813.practice.manager.profile.ProfileManager;
 import dev.nandi0813.practice.manager.sidebar.SidebarManager;
+import dev.nandi0813.practice.util.Common;
 import dev.nandi0813.practice.util.NameFormatUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.entity.Player;
 import org.intellij.lang.annotations.RegExp;
 
@@ -30,7 +31,13 @@ public enum AdapterUtil {
         return symbol == null || symbol.isBlank() ? "|" : symbol;
     }
 
-    // ==================== Helper Methods ====================
+    private static int getRoundSymbolMaxRounds() {
+        if (!SidebarManager.getInstance().getConfig().contains("MATCH.ROUND-SYMBOL-MAX-ROUNDS")) {
+            return 3;
+        }
+        return Math.max(0, SidebarManager.getInstance().getConfig().getInt("MATCH.ROUND-SYMBOL-MAX-ROUNDS"));
+    }
+
 
     /**
      * Creates a text replacement config for a simple string replacement
@@ -72,8 +79,8 @@ public enum AdapterUtil {
                 .replaceText(replace("%roundDuration%", roundDuration))
                 .replaceText(replace("%matchDuration%", match.getFormattedTime()))
                 .replaceText(replace("%ping%", String.valueOf(PlayerUtil.getPing(player))))
-                .replaceText(replace("%arena%", match.getArena().getDisplayName()))
-                .replaceText(replace("%ladder%", match.getLadder().getDisplayName()));
+                .replaceText(replace("%arena%", Common.deserializeMiniMessage(match.getArena().getDisplayName())))
+                .replaceText(replace("%ladder%", Common.deserializeMiniMessage(match.getLadder().getDisplayName())));
     }
 
     /**
@@ -81,12 +88,16 @@ public enum AdapterUtil {
      */
     private static Component replaceTeamPlaceholders(Component line, String prefix, TeamEnum team,
                                                      dev.nandi0813.practice.manager.fight.match.type.playersvsplayers.PlayersVsPlayers match, int winsNeeded) {
+        Component rounds = getRoundString(winsNeeded, match.getWonRounds(team));
+        Component coloredRounds = team.getColor().append(getRoundString(winsNeeded, match.getWonRounds(team), team.getColor()));
+
         return line
                 .replaceText(replace("%" + prefix + "name%", team.getNameComponent()))
                 .replaceText(replace("%" + prefix + "color%", team.getColor()))
                 .replaceText(replace("%" + prefix + "players%", String.valueOf(match.getTeamPlayers(team).size())))
                 .replaceText(replace("%" + prefix + "alivePlayers%", String.valueOf(match.getTeamAlivePlayers(team).size())))
-                .replaceText(replace("%" + prefix + "rounds%", getRoundString(winsNeeded, match.getWonRounds(team))))
+                .replaceText(replace("%" + prefix + "color%%" + prefix + "rounds%", coloredRounds))
+                .replaceText(replace("%" + prefix + "rounds%", rounds))
                 .replaceText(replace("%" + prefix + "roundsNumber%", String.valueOf(match.getWonRounds(team))));
     }
 
@@ -124,25 +135,39 @@ public enum AdapterUtil {
         return NameFormatUtil.resolveFullName(profile, player, player.getName());
     }
 
-    // ==================== Public Methods ====================
 
     public static Component getRoundString(int rounds, int wonRounds) {
-        StringBuilder string = new StringBuilder();
-        boolean firstNotWon = true;
+        return getRoundString(rounds, wonRounds, null);
+    }
+
+    public static Component getRoundString(int rounds, int wonRounds, Component wonColor) {
+        if (rounds <= 0) {
+            return Component.empty();
+        }
+
+        int clampedWonRounds = Math.max(0, Math.min(wonRounds, rounds));
+        int symbolMaxRounds = getRoundSymbolMaxRounds();
+        if (symbolMaxRounds > 0 && rounds > symbolMaxRounds) {
+            String counter = clampedWonRounds + "/" + rounds;
+            return wonColor == null ? Component.text(counter) : wonColor.append(Component.text(counter));
+        }
+
+        Component component = Component.empty();
+        String roundSymbol = getRoundSymbol();
+        Component wonSymbol = wonColor == null
+                ? Component.text(roundSymbol)
+                : wonColor.append(Component.text(roundSymbol));
+        Component notWonSymbol = Component.text(roundSymbol, NamedTextColor.GRAY);
 
         for (int i = 1; i <= rounds; i++) {
-            if (i <= wonRounds) {
-                string.append(getRoundSymbol());
+            if (i <= clampedWonRounds) {
+                component = component.append(wonSymbol);
             } else {
-                if (firstNotWon) {
-                    string.append("<gray>").append(getRoundSymbol());
-                    firstNotWon = false;
-                } else {
-                    string.append(getRoundSymbol());
-                }
+                component = component.append(notWonSymbol);
             }
         }
-        return ZonePractice.getMiniMessage().deserialize(string.toString());
+
+        return component;
     }
 
     public static Component replaceMatchPlaceholders(Player player, Component line, Match match) {
@@ -170,8 +195,12 @@ public enum AdapterUtil {
 
         // Replace combined placeholders for colored player names (boxing)
         line = replaceColoredPlayerName(line, "%playerTeamColor%%player%", team, player)
+                .replaceText(replace("%playerTeamColor%%rounds%",
+                        team.getColor().append(getRoundString(duel.getWinsNeeded(), duel.getWonRounds(player), team.getColor()))))
                 .replaceText(replace("%enemyTeamColor%%enemyName%",
-                        enemy == null ? Component.empty() : enemyTeam.getColor().append(getSidebarName(enemy))));
+                        enemy == null ? Component.empty() : enemyTeam.getColor().append(getSidebarName(enemy))))
+                .replaceText(replace("%enemyTeamColor%%enemyRounds%",
+                        enemy == null ? Component.empty() : enemyTeam.getColor().append(getRoundString(duel.getWinsNeeded(), duel.getWonRounds(enemy), enemyTeam.getColor()))));
 
         // Replace individual placeholders
         line = line
@@ -228,8 +257,8 @@ public enum AdapterUtil {
                 .replaceText(replace("%spectators%", String.valueOf(ffa.getSpectators().size())))
                 .replaceText(replace("%nextReset%", ffa.getBuildRollback() != null ? ffa.getBuildRollback().getFormattedTime() : "N/A"))
                 .replaceText(replace("%ping%", String.valueOf(PlayerUtil.getPing(player))))
-                .replaceText(replace("%ladder%", ffa.getPlayers().get(player).getDisplayName()))
-                .replaceText(replace("%arena%", ffa.getArena().getDisplayName()))
+                .replaceText(replace("%ladder%", Common.deserializeMiniMessage(ffa.getPlayers().get(player).getDisplayName())))
+                .replaceText(replace("%arena%", Common.deserializeMiniMessage(ffa.getArena().getDisplayName())))
                 .replaceText(replace("%kills%", String.valueOf(statistic.getKills())))
                 .replaceText(replace("%deaths%", String.valueOf(statistic.getDeaths())));
     }
@@ -239,7 +268,7 @@ public enum AdapterUtil {
                 .replaceText(replace("%players%", String.valueOf(ffa.getPlayers().size())))
                 .replaceText(replace("%spectators%", String.valueOf(ffa.getSpectators().size())))
                 .replaceText(replace("%nextReset%", ffa.getBuildRollback() != null ? ffa.getBuildRollback().getFormattedTime() : "N/A"))
-                .replaceText(replace("%arena%", ffa.getArena().getDisplayName()));
+                .replaceText(replace("%arena%", Common.deserializeMiniMessage(ffa.getArena().getDisplayName())));
     }
 
     public static Component replaceMatchSpectatePlaceholders(Component line, Match match) {
@@ -250,8 +279,8 @@ public enum AdapterUtil {
                 .replaceText(replace("%totalRounds%", String.valueOf(match.getLadder().getRounds())))
                 .replaceText(replace("%roundDuration%", roundDuration))
                 .replaceText(replace("%matchDuration%", match.getFormattedTime()))
-                .replaceText(replace("%arena%", match.getArena().getDisplayName()))
-                .replaceText(replace("%ladder%", match.getLadder().getDisplayName()));
+                .replaceText(replace("%arena%", Common.deserializeMiniMessage(match.getArena().getDisplayName())))
+                .replaceText(replace("%ladder%", Common.deserializeMiniMessage(match.getLadder().getDisplayName())));
 
         // Replace team colors for non-FFA matches
         if (!match.getType().equals(MatchType.PARTY_FFA)) {
@@ -277,7 +306,11 @@ public enum AdapterUtil {
 
         // Replace colored player names for boxing
         line = replaceColoredPlayerName(line, "%team1color%%player1%", TeamEnum.TEAM1, player1)
-                .replaceText(replace("%team2color%%player2%", TeamEnum.TEAM2.getColor().append(getSidebarName(player2))));
+                .replaceText(replace("%team2color%%player2%", TeamEnum.TEAM2.getColor().append(getSidebarName(player2))))
+                .replaceText(replace("%team1color%%player1rounds%",
+                        TeamEnum.TEAM1.getColor().append(getRoundString(duel.getWinsNeeded(), duel.getWonRounds(player1), TeamEnum.TEAM1.getColor()))))
+                .replaceText(replace("%team2color%%player2rounds%",
+                        TeamEnum.TEAM2.getColor().append(getRoundString(duel.getWinsNeeded(), duel.getWonRounds(player2), TeamEnum.TEAM2.getColor()))));
 
         // Replace individual player info
         return line

@@ -7,7 +7,6 @@ import dev.nandi0813.practice.manager.ladder.enums.LadderType;
 import dev.nandi0813.practice.manager.ladder.util.LadderKnockback;
 import dev.nandi0813.practice.util.Common;
 import dev.nandi0813.practice.util.KitData;
-import dev.nandi0813.practice.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Material;
@@ -42,6 +41,7 @@ public abstract class Ladder {
     protected double attackCooldownModifier = 1.0;
     @Setter
     protected int rounds = 1;
+    protected int hearts = 10;
 
     // Cooldowns
     @Setter
@@ -104,6 +104,7 @@ public abstract class Ladder {
         this.build = ladder.isBuild();
         this.attackCooldownModifier = ladder.getAttackCooldownModifier();
         this.rounds = ladder.getRounds();
+        this.hearts = ladder.getHearts();
         this.enderPearlCooldown = ladder.getEnderPearlCooldown();
         this.goldenAppleCooldown = ladder.getGoldenAppleCooldown();
         this.fireworkRocketCooldown = ladder.getFireworkRocketCooldown();
@@ -125,6 +126,10 @@ public abstract class Ladder {
 
     public abstract List<Arena> getArenas();
 
+    public void setHearts(int hearts) {
+        this.hearts = Math.clamp(hearts, 1, 20);
+    }
+
     public List<Arena> getAvailableArenas() {
         List<Arena> arenas = new ArrayList<>();
         for (Arena arena : getArenas())
@@ -140,11 +145,12 @@ public abstract class Ladder {
 
         this.icon = icon.clone();
 
-        String iconDisplayName = Common.getItemDisplayName(icon);
-        if (!iconDisplayName.isBlank())
-            this.displayName = StringUtil.CC(iconDisplayName);
-        else
+        String iconDisplayName = Common.getItemDisplayNameMiniMessage(icon);
+        if (!iconDisplayName.isBlank()) {
+            this.displayName = iconDisplayName;
+        } else {
             this.displayName = name;
+        }
     }
 
     public ItemStack getIcon() {

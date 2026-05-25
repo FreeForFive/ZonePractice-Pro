@@ -6,15 +6,16 @@ import dev.nandi0813.practice.manager.backend.LanguageManager;
 import dev.nandi0813.practice.manager.gui.GUIType;
 import dev.nandi0813.practice.manager.gui.setup.arena.ArenaGUISetupManager;
 import dev.nandi0813.practice.util.Common;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public final class SideBuildLimitArg {
+public final class PartyFfaCenterArg {
 
-    private SideBuildLimitArg() {}
+    private PartyFfaCenterArg() {}
 
     public static void run(Player player, String label, String[] args) {
         if (!player.hasPermission("zpp.setup")) {
@@ -22,37 +23,42 @@ public final class SideBuildLimitArg {
             return;
         }
 
-        if (args.length != 4) {
-            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.SIDEBUILDLIMIT.COMMAND-HELP").replace("%label%", label).replace("%label2%", args[1]));
+        if (args.length != 3) {
+            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.PARTYFFACENTER.COMMAND-HELP").replace("%label%", label));
             return;
         }
 
         Arena arena = ArenaManager.getInstance().getNormalArena(args[2]);
         if (arena == null) {
-            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.SIDEBUILDLIMIT.ARENA-NOT-EXISTS").replace("%arena%", args[2]));
+            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.PARTYFFACENTER.ARENA-NOT-EXISTS").replace("%arena%", args[2]));
             return;
         }
 
         if (arena.isEnabled()) {
-            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.SIDEBUILDLIMIT.ARENA-ENABLED").replace("%arena%", arena.getName()));
+            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.PARTYFFACENTER.ARENA-ENABLED").replace("%arena%", arena.getName()));
             return;
         }
 
-        if (!arena.isBuild()) {
-            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.SIDEBUILDLIMIT.NOT-BUILD").replace("%arena%", arena.getName()));
+        if (arena.isBuild() && !arena.getCopies().isEmpty()) {
+            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.PARTYFFACENTER.CANT-EDIT").replace("%arena%", arena.getName()));
             return;
         }
 
-        int sideBuildLimit = Integer.parseInt(args[3]);
-        if (sideBuildLimit < 0 || sideBuildLimit > 10) {
-            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.SIDEBUILDLIMIT.INVALID-NUMBER").replace("%arena%", arena.getName()));
+        if (arena.getCuboid() == null) {
+            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.PARTYFFACENTER.NO-REGION"));
             return;
         }
 
-        arena.setSideBuildLimit(sideBuildLimit);
+        Location center = player.getLocation().clone();
+        if (!arena.getCuboid().contains(center)) {
+            Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.PARTYFFACENTER.POS-OUTSIDE-REGION"));
+            return;
+        }
+
+        arena.setPartyFfaCenter(center);
         ArenaGUISetupManager.getInstance().getArenaSetupGUIs().get(arena).get(GUIType.Arena_Main).update();
-
-        Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.SIDEBUILDLIMIT.SET-SIDEBUILDLIMIT").replace("%arena%", arena.getName()).replace("%sideBuildLimit%", args[3]));
+        Common.sendMMMessage(player, LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.PARTYFFACENTER.SET")
+                .replace("%arena%", arena.getName()));
     }
 
     public static List<String> tabComplete(Player player, String[] args) {
@@ -68,5 +74,4 @@ public final class SideBuildLimitArg {
 
         return arguments;
     }
-
 }

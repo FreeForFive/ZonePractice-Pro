@@ -1,10 +1,13 @@
 package dev.nandi0813.practice.util;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import dev.nandi0813.practice.ZonePractice;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -19,12 +22,12 @@ public class ItemCreateUtil {
 
     /**
      * Parses a raw config string into a {@link Component}, supporting all color formats:
-     * legacy {@code &c} / {@code §c} codes, shorthand hex {@code &#RRGGBB}, Bungeecord hex
-     * {@code &x&R&R&G&G&B&B}, bare {@code #RRGGBB}, and MiniMessage tags {@code <red>}.
+     * legacy {@code <red>} / {@code §c} codes, shorthand hex {@code &#RRGGBB}, Bungeecord hex
+     * {@code &x<reset><reset>&G&G<aqua><aqua>}, bare {@code #RRGGBB}, and MiniMessage tags {@code <red>}.
      */
     private static Component parseColor(String raw) {
         if (raw == null || raw.isEmpty()) return Component.empty();
-        return ZonePractice.getMiniMessage().deserialize(StringUtil.translateColorsToMiniMessage(raw))
+        return ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(raw))
                 .decorationIfAbsent(net.kyori.adventure.text.format.TextDecoration.ITALIC,
                         net.kyori.adventure.text.format.TextDecoration.State.FALSE);
     }
@@ -148,7 +151,14 @@ public class ItemCreateUtil {
     public static ItemStack getPlayerHead(OfflinePlayer player) {
         ItemStack item = new ItemStack(Material.PLAYER_HEAD);
         SkullMeta meta = (SkullMeta) item.getItemMeta();
-        if (meta != null) meta.setOwningPlayer(player);
+        if (meta != null && player != null) {
+            PlayerProfile profile = Bukkit.createProfile(player.getUniqueId(), player.getName());
+            Player onlinePlayer = player.getPlayer();
+            if (onlinePlayer != null) {
+                profile = onlinePlayer.getPlayerProfile();
+            }
+            meta.setPlayerProfile(profile);
+        }
         item.setItemMeta(meta);
         return item;
     }

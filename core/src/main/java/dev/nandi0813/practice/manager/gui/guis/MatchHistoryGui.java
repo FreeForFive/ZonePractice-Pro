@@ -7,6 +7,7 @@ import dev.nandi0813.practice.manager.gui.GUIType;
 import dev.nandi0813.practice.manager.matchhistory.MatchHistoryEntry;
 import dev.nandi0813.practice.util.Common;
 import dev.nandi0813.practice.util.InventoryUtil;
+import dev.nandi0813.practice.util.ItemCreateUtil;
 import dev.nandi0813.practice.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
@@ -15,10 +16,12 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.SkullMeta;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -61,10 +64,10 @@ public class MatchHistoryGui extends GUI {
 
     @Override
     public void update() {
-        // ── Read config ────────────────────────────────────────
+        // Read config
         String rawTitle = GUIFile.getString("GUIS.MATCH-HISTORY.TITLE");
         if (rawTitle == null || rawTitle.isEmpty())
-            rawTitle = "&8Match History &7- &6%player%";
+            rawTitle = "<dark_gray>Match History <gray>- <gold>%player%";
         rawTitle = rawTitle.replace("%player%", targetName);
 
         int size = GUIFile.getInt("GUIS.MATCH-HISTORY.SIZE");
@@ -73,14 +76,14 @@ public class MatchHistoryGui extends GUI {
         boolean centerItems = getBooleanOrDefault("GUIS.MATCH-HISTORY.CENTER-ITEMS", true);
         int configuredStart = GUIFile.getInt("GUIS.MATCH-HISTORY.START-SLOT"); // -1 means auto
 
-        // ── Build inventory ────────────────────────────────────
+        // Build inventory
         Inventory inventory = InventoryUtil.createInventory(rawTitle, size / 9);
 
         // Fill with configurable glass pane
         ItemStack filler = buildFillerItem();
         for (int i = 0; i < size; i++) inventory.setItem(i, filler);
 
-        // ── Determine where to place the match items ───────────
+        // Determine where to place the match items
         int startSlot;
         if (configuredStart >= 0) {
             startSlot = configuredStart;
@@ -90,7 +93,7 @@ public class MatchHistoryGui extends GUI {
             startSlot = 0;
         }
 
-        // ── Place match items ──────────────────────────────────
+        // Place match items
         String materialStr = GUIFile.getString("GUIS.MATCH-HISTORY.MATCH-ITEM.MATERIAL");
         Material material = Material.PAPER;
         if (materialStr != null && !materialStr.isBlank()) {
@@ -110,8 +113,7 @@ public class MatchHistoryGui extends GUI {
         gui.put(1, inventory);
     }
 
-    // ── Item builders ────────────────────────────────────────────
-
+    // Item builders
     private ItemStack buildMatchItem(MatchHistoryEntry entry,
                                      Material fallbackMaterial,
                                      boolean usePlayerHead) {
@@ -130,7 +132,7 @@ public class MatchHistoryGui extends GUI {
                 : StringUtil.CC(GUIFile.getString(
                 "GUIS.MATCH-HISTORY.MESSAGES.LOSS"));
         final String result = (rawResult == null || rawResult.isBlank())
-                ? (won ? "§aWin" : draw ? "§eEquality" : "§cLoss")
+                ? (won ? "<green>Win" : draw ? "<yellow>Equality" : "<red>Loss")
                 : rawResult;
 
         double myHealth  = getMyHealth(entry);
@@ -138,14 +140,14 @@ public class MatchHistoryGui extends GUI {
         int    myScore   = getMyScore(entry);
         int    oppScore  = getOpponentScore(entry);
 
-        // ── Name ──────────────────────────────────────────────
+        // Name
         String rawName = GUIFile.getString("GUIS.MATCH-HISTORY.MATCH-ITEM.NAME");
         if (rawName == null || rawName.isBlank())
-            rawName = "&eMatch vs &f%opponent%";
+            rawName = "<yellow>Match vs <white>%opponent%";
         String displayName = applyPlaceholders(rawName, entry, oppName,
                 result, myScore, oppScore, myHealth, oppHealth, won, draw);
 
-        // ── Lore ──────────────────────────────────────────────
+        // Lore
         List<String> loreCfg = GUIFile.getStringList("GUIS.MATCH-HISTORY.MATCH-ITEM.LORE");
         if (loreCfg == null || loreCfg.isEmpty()) {
             loreCfg = defaultLore();
@@ -156,7 +158,7 @@ public class MatchHistoryGui extends GUI {
                 .map(line -> Common.legacyToComponent(StringUtil.CC(line)))
                 .collect(Collectors.toList());
 
-        // ── ItemStack ─────────────────────────────────────────
+        // ItemStack
         ItemStack item;
         if (usePlayerHead) {
             item = buildSkull(oppUuid, oppName);
@@ -192,14 +194,8 @@ public class MatchHistoryGui extends GUI {
     }
 
     private ItemStack buildSkull(UUID uuid, String name) {
-        ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
-        if (skullMeta != null) {
-            OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(uuid);
-            skullMeta.setOwningPlayer(op);
-            skull.setItemMeta(skullMeta);
-        }
-        return skull;
+        OfflinePlayer op = org.bukkit.Bukkit.getOfflinePlayer(uuid);
+        return ItemCreateUtil.getPlayerHead(op);
     }
 
     private ItemStack buildFillerItem() {
@@ -218,8 +214,7 @@ public class MatchHistoryGui extends GUI {
         return item;
     }
 
-    // ── Centering logic ──────────────────────────────────────────
-
+    // Centering logic
     /**
      * Computes the first slot so that {@code count} items are centred
      * inside the inventory. Works row-by-row:
@@ -242,8 +237,7 @@ public class MatchHistoryGui extends GUI {
         return startRow * 9 + startCol;
     }
 
-    // ── Placeholder helpers ──────────────────────────────────────
-
+    // Placeholder helpers
     private String applyPlaceholders(String text, MatchHistoryEntry entry,
                                      String oppName, String result,
                                      int myScore, int oppScore,
@@ -266,8 +260,7 @@ public class MatchHistoryGui extends GUI {
         return String.format("%.1f❤", raw / 2.0);
     }
 
-    // ── Perspective helpers ──────────────────────────────────────
-
+    // Perspective helpers
     private boolean isViewer(MatchHistoryEntry e) {
         return viewerUuid != null && e.getPlayerUuid().equals(viewerUuid);
     }
@@ -296,25 +289,23 @@ public class MatchHistoryGui extends GUI {
         return isViewer(e) ? e.getOpponentScore() : e.getPlayerScore();
     }
 
-    // ── Default lore ─────────────────────────────────────────────
-
+    // Default lore
     private List<String> defaultLore() {
         List<String> lore = new ArrayList<>();
-        lore.add("&8&m--------------------");
-        lore.add("&7Result: %result%");
-        lore.add("&7Score: %score%");
-        lore.add("&7Kit: &f%kit%");
-        lore.add("&7Arena: &f%arena%");
-        lore.add("&7Your Health: %player_health%");
-        lore.add("&7Opponent Health: %opponent_health%");
-        lore.add("&7Duration: &f%duration%");
-        lore.add("&7Played: &f%date%");
-        lore.add("&8&m--------------------");
+        lore.add("<dark_gray><st>--------------------");
+        lore.add("<gray>Result: %result%");
+        lore.add("<gray>Score: %score%");
+        lore.add("<gray>Kit: <white>%kit%");
+        lore.add("<gray>Arena: <white>%arena%");
+        lore.add("<gray>Your Health: %player_health%");
+        lore.add("<gray>Opponent Health: %opponent_health%");
+        lore.add("<gray>Duration: <white>%duration%");
+        lore.add("<gray>Played: <white>%date%");
+        lore.add("<dark_gray><st>--------------------");
         return lore;
     }
 
-    // ── Utility ─────────────────────────────────────────────────
-
+    // Utility
     private boolean getBooleanOrDefault(String path, boolean def) {
         if (GUIFile.getConfig().isSet(path.toUpperCase()))
             return GUIFile.getConfig().getBoolean(path.toUpperCase());

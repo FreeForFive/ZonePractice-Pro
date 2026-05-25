@@ -15,6 +15,7 @@ public enum SettingType {
     DROP_INVENTORY,
     WEIGHT_CLASS,
     ROUNDS,
+    HEARTS,
     RESPAWN_TIME,
     BOXING_HITS,
     FIREBALL_COOLDOWN,

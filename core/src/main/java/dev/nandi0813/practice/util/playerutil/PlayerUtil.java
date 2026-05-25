@@ -2,6 +2,7 @@ package dev.nandi0813.practice.util.playerutil;
 
 import dev.nandi0813.practice.ZonePractice;
 import dev.nandi0813.practice.manager.backend.LanguageManager;
+import dev.nandi0813.practice.manager.ladder.abstraction.Ladder;
 import dev.nandi0813.practice.manager.profile.Profile;
 import dev.nandi0813.practice.manager.profile.ProfileManager;
 import dev.nandi0813.practice.util.Common;
@@ -15,8 +16,11 @@ import org.bukkit.potion.PotionEffect;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public enum PlayerUtil {
-    ;
+public final class PlayerUtil {
+
+    private PlayerUtil() {}
+
+    private static final double DEFAULT_FIGHT_MAX_HEALTH = 20.0D;
 
     private static void clearStuckArrows(Player player) {
         try {
@@ -29,7 +33,8 @@ public enum PlayerUtil {
 
     public static void clearPlayer(Player player, boolean deleteInv, boolean fly, boolean entityCollide) {
         player.setFallDistance(0);
-        player.setHealth(20);
+        resetMaxHealth(player);
+        healToMaxHealth(player);
         player.setExp(0);
         player.setLevel(0);
         player.setFoodLevel(23);
@@ -52,20 +57,20 @@ public enum PlayerUtil {
     }
 
     public static void setFightPlayer(Player player) {
+        setFightPlayer(player, null);
+    }
+
+    public static void setFightPlayer(Player player, Ladder ladder) {
         Bukkit.getScheduler().runTask(ZonePractice.getInstance(), () ->
         {
-            player.setHealth(20);
-            Bukkit.getScheduler().runTaskLater(ZonePractice.getInstance(), () -> player.setHealth(20), 2L);
+            applyFightMaxHealth(player, ladder);
+            healToMaxHealth(player);
+            Bukkit.getScheduler().runTaskLater(ZonePractice.getInstance(), () -> {
+                applyFightMaxHealth(player, ladder);
+                healToMaxHealth(player);
+            }, 2L);
             Bukkit.getScheduler().runTaskLater(ZonePractice.getInstance(), () -> player.setFireTicks(0), 2L);
             player.setFoodLevel(25);
-            AttributeInstance maxHealth = player.getAttribute(Attribute.MAX_HEALTH);
-            if (maxHealth != null) {
-                maxHealth.setBaseValue(maxHealth.getDefaultValue());
-
-                if (player.getHealth() > maxHealth.getValue()) {
-                    player.setHealth(maxHealth.getValue());
-                }
-            }
             player.setFallDistance(0);
             player.setWalkSpeed(0.2F);
             for (PotionEffect potionEffect : player.getActivePotionEffects())
@@ -73,10 +78,32 @@ public enum PlayerUtil {
             player.setGameMode(GameMode.SURVIVAL);
             player.setFlying(false);
             player.setAllowFlight(false);
-            // Players can be marked non-collidable while temporarily spectating; restore combat hitboxes.
             dev.nandi0813.practice.manager.fight.util.PlayerUtil.setCollidesWithEntities(player, true);
-            // Clear stale invulnerability frames so shield-stun / rapid follow-up hits work consistently.
         });
+    }
+
+    public static void healToMaxHealth(Player player) {
+        AttributeInstance maxHealth = player.getAttribute(Attribute.MAX_HEALTH);
+        double maxHealthValue = maxHealth != null ? maxHealth.getValue() : DEFAULT_FIGHT_MAX_HEALTH;
+        player.setHealth(Math.max(1.0D, maxHealthValue));
+    }
+
+    public static void resetMaxHealth(Player player) {
+        AttributeInstance maxHealth = player.getAttribute(Attribute.MAX_HEALTH);
+        if (maxHealth == null) return;
+        maxHealth.setBaseValue(maxHealth.getDefaultValue());
+    }
+
+    private static void applyFightMaxHealth(Player player, Ladder ladder) {
+        AttributeInstance maxHealth = player.getAttribute(Attribute.MAX_HEALTH);
+        if (maxHealth == null) return;
+
+        double targetMaxHealth = DEFAULT_FIGHT_MAX_HEALTH;
+        if (ladder != null) {
+            targetMaxHealth = Math.clamp(ladder.getHearts() * 2.0D, 2.0D, 40.0D);
+        }
+
+        maxHealth.setBaseValue(targetMaxHealth);
     }
 
     public static void setPlayerWorldTime(Player player) {

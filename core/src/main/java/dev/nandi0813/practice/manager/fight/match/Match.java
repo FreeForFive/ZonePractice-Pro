@@ -31,9 +31,9 @@ import dev.nandi0813.practice.manager.profile.Profile;
 import dev.nandi0813.practice.manager.profile.ProfileManager;
 import dev.nandi0813.practice.manager.profile.enums.ProfileStatus;
 import dev.nandi0813.practice.manager.spectator.SpectatorManager;
-import dev.nandi0813.practice.telemetry.transport.stats.PracticeStatsTelemetryLogger;
 import dev.nandi0813.practice.util.Common;
 import dev.nandi0813.practice.util.Cuboid;
+import dev.nandi0813.practice.util.LastAttackerTracker;
 import dev.nandi0813.practice.util.PermanentConfig;
 import dev.nandi0813.practice.util.StringUtil;
 import dev.nandi0813.practice.util.entityhider.PlayerHider;
@@ -84,13 +84,9 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
     private final FightChangeOptimized fightChange;
 
     /** Tracks the last player that dealt damage to another player, for void-kill attribution. */
-    private final Map<UUID, UUID> lastAttackerMap = new HashMap<>();
-    /** Timestamp (ms) of the last attacker hit, keyed by victim UUID. */
-    private final Map<UUID, Long> lastAttackerTime = new HashMap<>();
+    private final LastAttackerTracker lastAttackerTracker = new LastAttackerTracker();
     /** Tracks whether a player's last registered death in this match was void-related. */
     private final Map<UUID, Boolean> lastDeathWasVoid = new HashMap<>();
-    /** How long (ms) a last-attacker is considered valid for void attribution. */
-    private static final long LAST_ATTACKER_EXPIRY_MS = 4_000L;
 
     /** True while the arena is being rolled back between rounds — players are frozen. */
     @Getter
@@ -118,7 +114,7 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
         }
         this.fightChange = new FightChangeOptimized(this);
 
-        if (arena != null && arena.getSideBuildLimit() > 0)
+        if (arena.getSideBuildLimit() > 0)
             this.sideBuildLimit = MatchUtil.getSideBuildLimitCube(this.arena.getCuboid().clone(), arena.getSideBuildLimit());
         else
             this.sideBuildLimit = null;
@@ -142,7 +138,7 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
                 this.allowSpectators = false;
             }
 
-            PlayerUtil.setFightPlayer(player);
+            PlayerUtil.setFightPlayer(player, this.ladder);
 
             for (Player online : Bukkit.getOnlinePlayers()) {
                 if (!this.players.contains(online)) {
@@ -159,15 +155,7 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
     }
 
     public void sendMessage(String message, boolean spectator) {
-        for (Player player : this.players) {
-            Common.sendMMMessage(player, message);
-        }
-
-        if (spectator) {
-            for (Player specPlayer : this.spectators) {
-                Common.sendMMMessage(specPlayer, message);
-            }
-        }
+        Common.sendMessage(players, spectators, message, spectator);
     }
 
     public void entityVanish(Player player) {
@@ -204,8 +192,7 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
      * Called from damage listeners so void deaths can be attributed correctly.
      */
     public void recordAttack(Player victim, Player attacker) {
-        lastAttackerMap.put(victim.getUniqueId(), attacker.getUniqueId());
-        lastAttackerTime.put(victim.getUniqueId(), System.currentTimeMillis());
+        lastAttackerTracker.recordAttack(victim, attacker);
     }
 
     /**
@@ -213,14 +200,7 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
      * or {@code null} if there is none.
      */
     public @org.jetbrains.annotations.Nullable Player getLastAttacker(Player victim) {
-        Long time = lastAttackerTime.get(victim.getUniqueId());
-        if (time == null || System.currentTimeMillis() - time > LAST_ATTACKER_EXPIRY_MS) return null;
-        UUID attackerUuid = lastAttackerMap.get(victim.getUniqueId());
-        if (attackerUuid == null) return null;
-        for (Player p : players) {
-            if (attackerUuid.equals(p.getUniqueId())) return p;
-        }
-        return null;
+        return lastAttackerTracker.getLastAttacker(victim, players);
     }
 
     public boolean wasLastDeathVoid(Player player) {
@@ -284,11 +264,9 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
             if (killer != null) {
                 Profile killerProfile = matchPlayers.get(killer).getProfile();
                 killerProfile.getStats().getLadderStat((NormalLadder) ladder).increaseKills();
-                PracticeStatsTelemetryLogger.markDirty(killerProfile);
             }
             Profile deadProfile = matchPlayers.get(player).getProfile();
             deadProfile.getStats().getLadderStat((NormalLadder) ladder).increaseDeaths();
-            PracticeStatsTelemetryLogger.markDirty(deadProfile);
         }
 
         playDeathEffect(killer, player);
@@ -297,28 +275,13 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
     }
 
     private void playDeathEffect(Player killer, Player victim) {
-        if (killer == null || victim == null) {
-            return;
-        }
+        if (killer == null || victim == null) return;
 
-        try {
-            Profile killerProfile = matchPlayers.containsKey(killer)
-                    ? matchPlayers.get(killer).getProfile()
-                    : ProfileManager.getInstance().getProfile(killer);
+        Profile killerProfile = matchPlayers.containsKey(killer)
+                ? matchPlayers.get(killer).getProfile()
+                : ProfileManager.getInstance().getProfile(killer);
 
-            if (killerProfile == null || killerProfile.getCosmeticsData() == null) {
-                return;
-            }
-
-            var deathEffect = killerProfile.getCosmeticsData().getDeathEffect();
-            if (deathEffect == null) {
-                return;
-            }
-
-            deathEffect.play(victim.getLocation(), getPeople());
-        } catch (Exception ignored) {
-            // Cosmetic effects should never break combat flow.
-        }
+        Common.playDeathEffect(killerProfile, victim.getLocation(), getPeople());
     }
 
     protected abstract void killPlayer(Player player, String deathMessage);
@@ -346,7 +309,13 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
             removeSpectator(spectator);
 
         // Reset the arena and only make it reusable after rollback completes.
-        resetMap(() -> this.arena.setAvailable(true));
+        // Also defer live-match removal to the rollback callback so block event listeners
+        // can still resolve this match via cuboid lookup during the multi-tick rollback,
+        // preventing untracked block changes from leaking into the next match.
+        resetMap(() -> {
+            MatchManager.getInstance().getLiveMatches().remove(this);
+            this.arena.setAvailable(true);
+        });
 
         this.cancel();
 
@@ -425,7 +394,7 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
             return;
         }
 
-        if (this.status.equals(MatchStatus.OVER)) {
+        if (this.status.equals(MatchStatus.OVER) || this.players.isEmpty()) {
             Common.sendMMMessage(player, LanguageManager.getString("SPECTATE.MATCH.MATCH-ENDED"));
             return;
         }
@@ -466,6 +435,7 @@ public abstract class Match extends BukkitRunnable implements Spectatable, dev.n
         }
 
         Profile profile = ProfileManager.getInstance().getProfile(player);
+        profile.setStatus(ProfileStatus.SPECTATE);
 
         if (profile.isStaffMode()) {
             InventoryManager.getInstance().setStaffModeInventory(player);

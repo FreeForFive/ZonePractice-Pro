@@ -62,7 +62,6 @@ public class LadderTypeListener implements Listener {
     private static final int SKYWARS_KILLER_EXP_LEVEL_REWARD = 5;
     private static final int SKYWARS_ENCHANT_LAPIS_AMOUNT = 3;
 
-    // ========== HELPER METHODS ==========
 
     /**
      * Gets the match for a player if they are in MATCH status.
@@ -151,7 +150,7 @@ public class LadderTypeListener implements Listener {
         return null;
     }
 
-    // ========== EVENT HANDLERS ==========
+    // EVENT HANDLERS
 
     protected static void arrowDisplayHearth(Player shooter, Player target, double finalDamage, EntityDamageByEntityEvent event) {
         if (!PermanentConfig.DISPLAY_ARROW_HIT) return;
@@ -339,14 +338,7 @@ public class LadderTypeListener implements Listener {
 
         Block block = e.getBlock();
 
-        // Blocks placed during the fight — allow breaking (tracking done by BuildListener)
-        if (BlockUtil.hasMetadata(block, PLACED_IN_FIGHT)) {
-            Object mv = BlockUtil.getMetadata(block, PLACED_IN_FIGHT, Object.class);
-            if (ListenerUtil.checkMetaData(mv)) {
-                e.setCancelled(true);
-            }
-            return;
-        }
+        if (ListenerUtil.handlePlacedInFightBlock(block, e)) return;
 
         // For natural arena blocks or destroyable blocks, check build limits
         if (!isWithinBuildLimits(block, match, player)) {

@@ -97,13 +97,6 @@ public abstract class BasicArena {
         if (this.cuboid != null) {
             Bukkit.getScheduler().runTask(ZonePractice.getInstance(), () -> {
                 ArenaUtil.loadArenaChunks(this);
-
-                if (ArenaManager.LOAD_CHUNKS) {
-                    // Collect only chunks that are already loaded — this avoids
-                    // synchronous chunk loading on the main thread which caused
-                    // server hangs of 10-15+ seconds.
-                    ArenaManager.LOADED_CHUNKS.addAll(this.cuboid.getChunks());
-                }
             });
         }
     }

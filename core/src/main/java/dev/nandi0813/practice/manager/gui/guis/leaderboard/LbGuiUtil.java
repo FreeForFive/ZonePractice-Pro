@@ -31,14 +31,9 @@ import java.util.stream.Collectors;
 public enum LbGuiUtil {
     ;
 
-    /**
-     * Parses a raw config string into a Component with full color support
-     * (legacy &c, hex &#RRGGBB, MiniMessage tags) and italic explicitly disabled.
-     */
     private static Component parseColor(String raw) {
         if (raw == null || raw.isEmpty()) return Component.empty();
-        return ZonePractice.getMiniMessage()
-                .deserialize(StringUtil.translateColorsToMiniMessage(raw))
+        return ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(raw))
                 .decorationIfAbsent(TextDecoration.ITALIC, TextDecoration.State.FALSE);
     }
 
@@ -92,9 +87,9 @@ public enum LbGuiUtil {
         }
 
         String divisionName = profile.getStats().getDivision() != null
-                ? Common.mmToNormal(profile.getStats().getDivision().getFullName()) : "&cN/A";
+                ? Common.mmToNormal(profile.getStats().getDivision().getFullName()) : "<red>N/A";
         String divisionShort = profile.getStats().getDivision() != null
-                ? Common.mmToNormal(profile.getStats().getDivision().getShortName()) : "&cN/A";
+                ? Common.mmToNormal(profile.getStats().getDivision().getShortName()) : "<red>N/A";
 
         guiItem
                 .replace("%ladder%", ladder.getDisplayName())
@@ -118,9 +113,9 @@ public enum LbGuiUtil {
         List<String> lore = new ArrayList<>();
 
         String divisionName = profile.getStats().getDivision() != null
-                ? Common.mmToNormal(profile.getStats().getDivision().getFullName()) : "&cN/A";
+                ? Common.mmToNormal(profile.getStats().getDivision().getFullName()) : "<red>N/A";
         String divisionShort = profile.getStats().getDivision() != null
-                ? Common.mmToNormal(profile.getStats().getDivision().getShortName()) : "&cN/A";
+                ? Common.mmToNormal(profile.getStats().getDivision().getShortName()) : "<red>N/A";
 
         for (String line : GUIFile.getStringList("GUIS.STATISTICS.PLAYER-STATISTICS.ICONS.ALL-STAT.LORE")) {
             lore.add(line
@@ -158,8 +153,10 @@ public enum LbGuiUtil {
             List<OfflinePlayer> topPlayers = new ArrayList<>();
             Map<OfflinePlayer, Integer> list = leaderboard.getList();
             for (OfflinePlayer player : list.keySet()) {
-                if (topPlayers.size() < showPlayers) topPlayers.add(player);
-                else break;
+                if (player.getName() != null && ProfileManager.getInstance().getProfile(player) != null) {
+                    topPlayers.add(player);
+                }
+                if (topPlayers.size() >= showPlayers) break;
             }
 
             List<String> topStrings = new ArrayList<>();
@@ -171,7 +168,7 @@ public enum LbGuiUtil {
                     int stat = list.get(target);
                     topStrings.add(GUIFile.getString("GUIS.STATISTICS.ELO-LEADERBOARD.ICONS.LADDER-LEADERBOARD.LORE.FORMAT")
                             .replace("%number%", String.valueOf(i))
-                            .replace("%player%", Objects.requireNonNull(target.getName()))
+                            .replace("%player%", target.getName())
                             .replace("%ladder_elo%", String.valueOf(stat))
                             .replace("%division%", division != null ? Common.mmToNormal(division.getFullName()) : "")
                             .replace("%division_short%", division != null ? Common.mmToNormal(division.getShortName()) : ""));
@@ -204,8 +201,10 @@ public enum LbGuiUtil {
             List<OfflinePlayer> topPlayers = new ArrayList<>();
             Map<OfflinePlayer, Integer> list = leaderboard.getList();
             for (OfflinePlayer player : list.keySet()) {
-                if (topPlayers.size() < showPlayers) topPlayers.add(player);
-                else break;
+                if (player.getName() != null && ProfileManager.getInstance().getProfile(player) != null) {
+                    topPlayers.add(player);
+                }
+                if (topPlayers.size() >= showPlayers) break;
             }
 
             List<String> topStrings = new ArrayList<>();
@@ -219,7 +218,7 @@ public enum LbGuiUtil {
                             .replace("%number%", String.valueOf(i))
                             .replace("%division%", division != null ? Common.mmToNormal(division.getFullName()) : "")
                             .replace("%division_short%", division != null ? Common.mmToNormal(division.getShortName()) : "")
-                            .replace("%player%", Objects.requireNonNull(target.getName()))
+                            .replace("%player%", target.getName())
                             .replace("%global_elo%", String.valueOf(stat)));
                 } else {
                     topStrings.add(GUIFile.getString("GUIS.STATISTICS.ELO-LEADERBOARD.ICONS.GLOBAL-LEADERBOARD.LORE.FORMAT-NULL")
@@ -250,8 +249,10 @@ public enum LbGuiUtil {
             List<OfflinePlayer> topPlayers = new ArrayList<>();
             Map<OfflinePlayer, Integer> list = leaderboard.getList();
             for (OfflinePlayer player : list.keySet()) {
-                if (topPlayers.size() < showPlayers) topPlayers.add(player);
-                else break;
+                if (player.getName() != null && ProfileManager.getInstance().getProfile(player) != null) {
+                    topPlayers.add(player);
+                }
+                if (topPlayers.size() >= showPlayers) break;
             }
 
             List<String> topStrings = new ArrayList<>();
@@ -296,8 +297,10 @@ public enum LbGuiUtil {
             List<OfflinePlayer> topPlayers = new ArrayList<>();
             Map<OfflinePlayer, Integer> list = leaderboard.getList();
             for (OfflinePlayer player : list.keySet()) {
-                if (topPlayers.size() < showPlayers) topPlayers.add(player);
-                else break;
+                if (player.getName() != null && ProfileManager.getInstance().getProfile(player) != null) {
+                    topPlayers.add(player);
+                }
+                if (topPlayers.size() >= showPlayers) break;
             }
 
             List<String> topStrings = new ArrayList<>();
@@ -311,7 +314,7 @@ public enum LbGuiUtil {
                             .replace("%number%", String.valueOf(i))
                             .replace("%division%", division != null ? Common.mmToNormal(division.getFullName()) : "")
                             .replace("%division_short%", division != null ? Common.mmToNormal(division.getShortName()) : "")
-                            .replace("%player%", Objects.requireNonNull(target.getName()))
+                            .replace("%player%", target.getName())
                             .replace("%global_win%", String.valueOf(stat)));
                 } else {
                     topStrings.add(GUIFile.getString("GUIS.STATISTICS.WIN-LEADERBOARD.ICONS.GLOBAL-LEADERBOARD.LORE.FORMAT-NULL")
@@ -333,18 +336,17 @@ public enum LbGuiUtil {
 
     public static ItemStack getCacheInfoItem() {
         List<String> lore = new ArrayList<>();
-        lore.add("&8&m------------------------");
-        lore.add("&7This leaderboard automatically");
-        lore.add("&7updates every &e5 minutes&7.");
+        lore.add("<dark_gray><st>------------------------");
+        lore.add("<gray>This leaderboard automatically");
+        lore.add("<gray>updates every <yellow>5 minutes<gray>.");
         lore.add("");
-        lore.add("&7Last update: &aRecently");
-        lore.add("&7Next update: &eWithin 5 minutes");
-        lore.add("&8&m------------------------");
-        return buildItem(Material.CLOCK, "&eAuto-Update Info", lore);
+        lore.add("<gray>Last update: <green>Recently");
+        lore.add("<gray>Next update: <yellow>Within 5 minutes");
+        lore.add("<dark_gray><st>------------------------");
+        return buildItem(Material.CLOCK, "<yellow>Auto-Update Info", lore);
     }
 
-    // ── Item building helpers ────────────────────────────────────────────────
-
+    // Item building helpers
     /** Builds an ItemStack from an existing icon with a parsed name and lore. */
     private static ItemStack buildItem(ItemStack icon, String name, List<String> lore) {
         ItemStack item = icon != null ? icon.clone() : new ItemStack(Material.BARRIER);

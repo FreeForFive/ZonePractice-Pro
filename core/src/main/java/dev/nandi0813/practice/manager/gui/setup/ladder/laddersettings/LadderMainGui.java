@@ -8,6 +8,7 @@ import dev.nandi0813.practice.manager.gui.GUIManager;
 import dev.nandi0813.practice.manager.gui.GUIType;
 import dev.nandi0813.practice.manager.gui.confirmgui.ConfirmGuiType;
 import dev.nandi0813.practice.manager.gui.setup.ladder.LadderSetupManager;
+import dev.nandi0813.practice.manager.gui.setup.ladder.LadderSummaryGui;
 import dev.nandi0813.practice.manager.ladder.abstraction.Ladder;
 import dev.nandi0813.practice.manager.ladder.abstraction.normal.NormalLadder;
 import dev.nandi0813.practice.manager.ladder.util.LadderUtil;
@@ -85,7 +86,13 @@ public class LadderMainGui extends GUI {
 
         switch (slot) {
             case 27:
-                GUIManager.getInstance().searchGUI(GUIType.Ladder_Summary).open(player);
+                GUI summaryGui = GUIManager.getInstance().searchGUI(GUIType.Ladder_Summary);
+                if (summaryGui instanceof LadderSummaryGui ladderSummaryGui) {
+                    ladderSummaryGui.open(player, ladderSummaryGui.getBackToPage().getOrDefault(player, 1));
+                    ladderSummaryGui.getBackToPage().remove(player);
+                } else {
+                    summaryGui.open(player);
+                }
                 break;
             case 11:
                 if (ladder.isEnabled()) {
@@ -155,7 +162,13 @@ public class LadderMainGui extends GUI {
                 break;
             case LADDER_DELETE:
                 player.performCommand("ladder delete " + ladder.getName());
-                GUIManager.getInstance().searchGUI(GUIType.Ladder_Summary).open(player);
+                GUI summaryGui = GUIManager.getInstance().searchGUI(GUIType.Ladder_Summary);
+                if (summaryGui instanceof LadderSummaryGui ladderSummaryGui) {
+                    ladderSummaryGui.open(player, ladderSummaryGui.getBackToPage().getOrDefault(player, 1));
+                    ladderSummaryGui.getBackToPage().remove(player);
+                } else {
+                    summaryGui.open(player);
+                }
                 break;
         }
     }

@@ -1,4 +1,4 @@
-VERSION: 40
+VERSION: 42
 
 CONSOLE-NAME: "<red>Console"
 CANT-USE-CONSOLE: "<red>You can't use this command from the console."
@@ -140,6 +140,7 @@ COMMAND:
           - " <red>» <click:suggest_command:'/%label% set buildmax '><hover:show_text:'<gray>Set the maximum build height.'>/%label% set buildmax <arena>"
           - " <red>» <click:suggest_command:'/%label% set deadzone '><hover:show_text:'<gray>Set the deadzone Y level.'>/%label% set deadzone <arena>"
           - " <red>» <click:suggest_command:'/%label% set sidebuildlimit '><hover:show_text:'<gray>Set the side building limit.'>/%label% set sidebuildlimit <arena>"
+          - " <red>» <click:suggest_command:'/%label% set partyffacenter '><hover:show_text:'<gray>Set Party FFA center to your location.'>/%label% set partyffacenter <arena>"
           - "<red><st>------------------------------------------"
       INFO:
         COMMAND-HELP: "<red>/%label% info <name>"
@@ -163,6 +164,7 @@ COMMAND:
           - ""
           - " <gray>» <gold>Player 2 Position: <white>%position1%"
           - " <gray>» <gold>Player 2 Position: <white>%position2%"
+          - " <gray>» <gold>Party FFA Center: <white>%partyFfaCenter%"
           - ""
           - " <gray>» <gold>Status: %status%"
           - "<gray><st>-----------------------------------"
@@ -304,6 +306,14 @@ COMMAND:
         NOT-BUILD: "<red>Arena must be build to set this property."
         INVALID-NUMBER: "<red>Please give a correctly formatted number between 0 and 10"
         SET-SIDEBUILDLIMIT: "<green>You set the side build limit for the arena <yellow>%arena%<green>. Side Build Limit: <red>%sideBuildLimit%"
+      PARTYFFACENTER:
+        COMMAND-HELP: "<red>/%label% set partyffacenter <arena>"
+        ARENA-NOT-EXISTS: "<red>%arena% arena doesn't exists."
+        ARENA-ENABLED: "<red>You can't edit an enabled arena."
+        CANT-EDIT: "<red>You can't edit arenas that have copies. (%arena%)"
+        NO-REGION: "<red>You must set the two corners of the arena first."
+        POS-OUTSIDE-REGION: "<red>The center must be inside the arena cube."
+        SET: "<green>You set the Party FFA center for arena <yellow>%arena%<green>."
   LADDER:
     NO-PERMISSION: "<red>You don't have permission!"
     ARGUMENTS:
@@ -334,7 +344,7 @@ COMMAND:
           - "<red><st>------------------------------------------"
       CREATE:
         COMMAND-HELP: "<red>/%label% create <name>"
-        REACHED-MAX: "<red>The server has reached the maximum number of ladders. (45/45)"
+        REACHED-MAX: "<red>The server has reached the maximum number of ladders. (%max%/%max%)"
       DELETE:
         COMMAND-HELP: "<red>/%label% delete <ladder>"
         NOT-EXISTS: "<red>%ladder% ladder doesn't exists."
@@ -616,13 +626,19 @@ COMMAND:
   HOLOGRAM:
     NO-PERMISSION: "<red>You don't have permission."
     CANT-USE: "<red>You can't use this right now!"
-    COMMAND-HELP: "<red>/%label% create <name> <type>"
+    COMMAND-HELP:
+      - "<red>/%label% create <name> <type>"
+      - "<red>/%label% teleport <name>"
     INVALID-TYPE: "<red>Invalid hologram type. Available types: <yellow>global, ladder_static, ladder_dynamic"
     ONLY-IN-LOBBY: "<red>You can only create holograms in the lobby."
     REACHED-MAX: "<red>You can't create more than 18 holograms."
     HOLO-EXISTS: "<red>Hologram with this name is already exists."
     CREATE-ERROR: "<red>Hologram name must be 9 character or less."
     CREATE-SUCCESS: "<green>You successfully created the <yellow>%hologram% <green>hologram."
+    TELEPORT:
+      COMMAND-HELP: "<red>/%label% teleport <name>"
+      HOLOGRAM-NOT-EXISTS: "<red>%hologram% hologram doesn't exists."
+      TELEPORTED: "<green>You moved <yellow>%hologram% <green>to your current location."
   MATCH-STAT:
     COMMAND-HELP: "<red>/matchinv <matchID> <player_uuid> <round>"
     INVALID-MATCH-ID: "<red>Match id is either invalid or it has expired."
@@ -695,7 +711,7 @@ COMMAND:
         NO-INVITES: "<red>%target% doesn't accept party invites."
         ALREADY-INVITED: "<red>%target% is already invited to the party."
         PLAYER-INVITED: "<green>%target% <yellow>has been invited to the party!"
-        PLAYER-GOT-INVITE: "<aqua>%inviter% <yellow>has invited you to their party. <hover:show_text:'<yellow>Click here to accept the invite.'><click:run_command:/party accept %inviter%>&a[ACCEPT]"
+        PLAYER-GOT-INVITE: "<aqua>%inviter% <yellow>has invited you to their party. <hover:show_text:'<yellow>Click here to accept the invite.'><click:run_command:/party accept %inviter%><green>[ACCEPT]"
       KICK:
         COMMAND-HELP: "<red>/%label% kick <player>"
         NO-PARTY: "<red>You are not a member of a party."
@@ -745,6 +761,7 @@ COMMAND:
           - " <red> » /%label% lobby set <gray>- <white>Set lobby location."
           - " <red> » /%label% lobby load <gray>- <white>Load lobby inventory."
           - " <red> » /%label% arenas <gray>- <white>Teleport to arenas world."
+          - " <red> » /%label% hologram <gray>- <white>Manage practice holograms."
           - " <red> » /%label% rename <gray>- <white>Rename the item in your hand."
           - " <red> » /%label% info <player> <gray>- <white>View player's info."
           - " <red> » /%label% goldenhead <amount> - Get some golden heads."
@@ -910,7 +927,7 @@ COMMAND:
       ARENAS-WORLD: "<red>You must be in the arenas world to set up the event."
       SET-FIRST-CORNER: "<yellow>You set the <green>first <yellow>corner for the <red>%event% <yellow>event."
       SET-SECOND-CORNER: "<yellow>You set the <green>seconds <yellow>corner for the <red>%event% <yellow>event."
-      MAP-SET: "<green>You have successfully selected the area for the <yellow>%event% event&a."
+      MAP-SET: "<green>You have successfully selected the area for the <yellow>%event% event<green>."
     HOLOGRAM:
       CANT-EDIT-ENABLED: "<red>You can't edit enabled holograms."
       NO-REQUIREMENTS: "<red>Hologram doesn't meet the requirements."
@@ -973,14 +990,14 @@ COMMAND:
           PLAYER: "<yellow>You removed <red>%target% <yellow> as spectator."
           TARGET: "<yellow>You've got removed from spectating by <red>%player%<yellow>."
       HELP:
-        - "&c&m------------------------------------------------"
-        - " &c » /%label% enable - Enable staff mode."
-        - " &c » /%label% chat - Toggle staff chat."
-        - " &c » /%label% chat <message> - Send message in staff chat." # Console
-        - " &c » /%label% vanish - Toggle visibility."
-        - " &c » /%label% forceend <player> - Force end any match or event." # Console
-        - " &c » /%label% stop <player> - Remove a player from a match or event." # Console
-        - "&c&m------------------------------------------------"
+        - "<red><st>------------------------------------------------"
+        - " <red> » /%label% enable - Enable staff mode."
+        - " <red> » /%label% chat - Toggle staff chat."
+        - " <red> » /%label% chat <message> - Send message in staff chat." # Console
+        - " <red> » /%label% vanish - Toggle visibility."
+        - " <red> » /%label% forceend <player> - Force end any match or event." # Console
+        - " <red> » /%label% stop <player> - Remove a player from a match or event." # Console
+        - "<red><st>------------------------------------------------"
       VANISH:
         COMMAND-HELP: "<red>/%label% vanish"
         CANT-USE: "<red>You can't use this command right now."
@@ -1460,15 +1477,15 @@ MATCH:
       BED-WARS:
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
-        BED-DESTROYED: "%team% team's &ebed has been destroyed!"
+        BED-DESTROYED: "%team% team's <yellow>bed has been destroyed!"
       FIREBALL-FIGHT:
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
-        BED-DESTROYED: "%team% team's &ebed has been destroyed!"
+        BED-DESTROYED: "%team% team's <yellow>bed has been destroyed!"
       MLG-RUSH:
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
-        BED-DESTROYED: "%team% team's &ebed has been destroyed!"
+        BED-DESTROYED: "%team% team's <yellow>bed has been destroyed!"
       BATTLE-RUSH:
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
@@ -1573,15 +1590,15 @@ MATCH:
       BED-WARS:
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
-        BED-DESTROYED: "%team% team's &ebed has been destroyed!"
+        BED-DESTROYED: "%team% team's <yellow>bed has been destroyed!"
       FIREBALL-FIGHT:
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
-        BED-DESTROYED: "%team% team's &ebed has been destroyed!"
+        BED-DESTROYED: "%team% team's <yellow>bed has been destroyed!"
       MLG-RUSH:
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
-        BED-DESTROYED: "%team% team's &ebed has been destroyed!"
+        BED-DESTROYED: "%team% team's <yellow>bed has been destroyed!"
       BATTLE-RUSH:
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
@@ -1636,17 +1653,17 @@ MATCH:
         PLAYER-DIED: "%teamColor%%player% <yellow>has <red>died<yellow>."
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
-        BED-DESTROYED: "%team% team's &ebed has been destroyed!"
+        BED-DESTROYED: "%team% team's <yellow>bed has been destroyed!"
       FIREBALL-FIGHT:
         PLAYER-DIED: "%teamColor%%player% <yellow>has <red>died<yellow>."
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
-        BED-DESTROYED: "%team% team's &ebed has been destroyed!"
+        BED-DESTROYED: "%team% team's <yellow>bed has been destroyed!"
       MLG-RUSH:
         PLAYER-DIED: "%teamColor%%player% <yellow>has <red>died<yellow>."
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."
         PLAYER-RESPAWNED: "%teamColor%%player% <yellow>has <green>respawned<yellow>."
-        BED-DESTROYED: "%team% team's &ebed has been destroyed!"
+        BED-DESTROYED: "%team% team's <yellow>bed has been destroyed!"
       BATTLE-RUSH:
         PLAYER-DIED: "%teamColor%%player% <yellow>has <red>died<yellow>."
         RESPAWN: "<yellow>You will respawn in <red>%seconds% <yellow>%secondName%."

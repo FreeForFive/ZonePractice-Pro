@@ -41,6 +41,7 @@ public class LadderFile extends ConfigFile {
         config.set("settings.multiRoundStartCountdown", ladder.isMultiRoundStartCountdown());
         config.set("settings.hitdelay", ladder.getAttackCooldownModifier());
         config.set("settings.rounds", ladder.getRounds());
+        config.set("settings.hearts", ladder.getHearts());
         config.set("settings.maxduration", ladder.getMaxDuration());
         config.set("settings.epcooldown", ladder.getEnderPearlCooldown());
         config.set("settings.gacooldown", ladder.getGoldenAppleCooldown());
@@ -194,6 +195,12 @@ public class LadderFile extends ConfigFile {
             ladder.setRounds(rounds);
         } else
             ladder.setRounds(1);
+
+        if (config.isInt("settings.hearts")) {
+            ladder.setHearts(config.getInt("settings.hearts"));
+        } else {
+            ladder.setHearts(10);
+        }
 
         if (config.isInt("settings.maxduration")) {
             ladder.setMaxDuration(config.getInt("settings.maxduration"));

@@ -20,9 +20,9 @@ import dev.nandi0813.practice.manager.profile.Profile;
 import dev.nandi0813.practice.manager.profile.ProfileManager;
 import dev.nandi0813.practice.manager.profile.enums.ProfileStatus;
 import dev.nandi0813.practice.manager.spectator.SpectatorManager;
-import dev.nandi0813.practice.telemetry.transport.stats.PracticeStatsTelemetryLogger;
 import dev.nandi0813.practice.util.Common;
 import dev.nandi0813.practice.util.Cuboid;
+import dev.nandi0813.practice.util.LastAttackerTracker;
 import dev.nandi0813.practice.util.entityhider.PlayerHider;
 import dev.nandi0813.practice.util.fightmapchange.FightChangeOptimized;
 import dev.nandi0813.practice.util.interfaces.Spectatable;
@@ -56,11 +56,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
     private boolean open;
 
     /** Tracks the last player that dealt damage to another player, for void-kill attribution. */
-    private final Map<UUID, UUID> lastAttackerMap = new HashMap<>();
-    /** Timestamp (ms) of the last attacker hit, keyed by victim UUID. */
-    private final Map<UUID, Long> lastAttackerTime = new HashMap<>();
-    /** How long (ms) a last-attacker is considered valid for void attribution. */
-    private static final long LAST_ATTACKER_EXPIRY_MS = 4_000L;
+    private final LastAttackerTracker lastAttackerTracker = new LastAttackerTracker();
 
     public FFA(FFAArena arena) {
         this.arena = arena;
@@ -145,7 +141,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
         teleportPlayer(player);
         this.sendMessage(LanguageManager.getString("FFA.GAME.PLAYER-JOIN").replace("%player%", player.getName()), true);
 
-        PlayerUtil.setFightPlayer(player);
+        PlayerUtil.setFightPlayer(player, ladder);
         this.addPlayerToBelowName(player);
 
         // Show kit chooser or apply default kit
@@ -162,7 +158,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
             return;
 
         players.put(player, ladder);
-        PlayerUtil.setFightPlayer(player);
+        PlayerUtil.setFightPlayer(player, ladder);
         KitUtil.loadDefaultLadderKit(player, TeamEnum.FFA, ladder);
         dev.nandi0813.practice.manager.fight.util.PlayerUtil.setAttackSpeed(player, ladder.getAttackCooldownModifier());
     }
@@ -225,7 +221,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
         // check whether a recent attacker should be credited instead.
         if (killer == null) {
             Player lastAttacker = getLastAttacker(player);
-            if (lastAttacker != null && deathMessage != null
+            if (lastAttacker != null && !lastAttacker.equals(player) && deathMessage != null
                     && deathMessage.equals(dev.nandi0813.practice.manager.fight.util.DeathCause.VOID.getMessage())) {
                 killer = lastAttacker;
                 deathMessage = dev.nandi0813.practice.manager.fight.util.DeathCause.VOID_BY_PLAYER
@@ -237,12 +233,10 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
         fightPlayers.get(player).die(deathMessage, statistics.get(player));
         Profile deadProfile = fightPlayers.get(player).getProfile();
         deadProfile.getStats().getLadderStat(players.get(player)).increaseDeaths();
-        PracticeStatsTelemetryLogger.markDirty(deadProfile);
 
-        if (killer != null) {
+        if (killer != null && !killer.equals(player)) {
             Profile killerProfile = fightPlayers.get(killer).getProfile();
             killerProfile.getStats().getLadderStat(players.get(killer)).increaseKills();
-            PracticeStatsTelemetryLogger.markDirty(killerProfile);
 
             playDeathEffect(killer, player);
 
@@ -258,7 +252,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
         if (arena.isLobbyAfterDeath()) {
             this.removePlayer(player);
         } else {
-            PlayerUtil.setFightPlayer(player);
+            PlayerUtil.setFightPlayer(player, players.get(player));
             applySelectedOrDefaultKit(player);
             dev.nandi0813.practice.manager.fight.util.PlayerUtil.setAttackSpeed(player, players.get(player).getAttackCooldownModifier());
 
@@ -281,30 +275,15 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
     }
 
     private void playDeathEffect(Player killer, Player victim) {
-        if (killer == null || victim == null) {
-            return;
-        }
+        if (killer == null || victim == null) return;
 
-        try {
-            Profile killerProfile = fightPlayers.containsKey(killer)
-                    ? fightPlayers.get(killer).getProfile()
-                    : ProfileManager.getInstance().getProfile(killer);
+        Profile killerProfile = fightPlayers.containsKey(killer)
+                ? fightPlayers.get(killer).getProfile()
+                : ProfileManager.getInstance().getProfile(killer);
 
-            if (killerProfile == null || killerProfile.getCosmeticsData() == null) {
-                return;
-            }
-
-            var deathEffect = killerProfile.getCosmeticsData().getDeathEffect();
-            if (deathEffect == null) {
-                return;
-            }
-
-            List<Player> viewers = new ArrayList<>(players.keySet());
-            viewers.addAll(spectators);
-            deathEffect.play(victim.getLocation(), viewers);
-        } catch (Exception ignored) {
-            // Cosmetic effects should never break FFA kill handling.
-        }
+        List<Player> viewers = new ArrayList<>(players.keySet());
+        viewers.addAll(spectators);
+        Common.playDeathEffect(killerProfile, victim.getLocation(), viewers);
     }
 
     private void applyHealthResetOnKill(Player killer) {
@@ -322,10 +301,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
      * Called from damage listeners so void deaths can be attributed correctly.
      */
     public void recordAttack(Player victim, Player attacker) {
-        if (victim == attacker) return;
-
-        lastAttackerMap.put(victim.getUniqueId(), attacker.getUniqueId());
-        lastAttackerTime.put(victim.getUniqueId(), System.currentTimeMillis());
+        lastAttackerTracker.recordAttack(victim, attacker);
     }
 
     /**
@@ -333,14 +309,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
      * or {@code null} if there is none.
      */
     public @org.jetbrains.annotations.Nullable Player getLastAttacker(Player victim) {
-        Long time = lastAttackerTime.get(victim.getUniqueId());
-        if (time == null || System.currentTimeMillis() - time > LAST_ATTACKER_EXPIRY_MS) return null;
-        UUID attackerUuid = lastAttackerMap.get(victim.getUniqueId());
-        if (attackerUuid == null) return null;
-        for (Player p : players.keySet()) {
-            if (attackerUuid.equals(p.getUniqueId())) return p;
-        }
-        return null;
+        return lastAttackerTracker.getLastAttacker(victim, players.keySet());
     }
 
     public void teleportPlayer(Player player) {
@@ -348,14 +317,7 @@ public class FFA implements Spectatable, dev.nandi0813.api.Interface.FFA {
     }
 
     public void sendMessage(String message, boolean spectator) {
-        for (Player player : players.keySet()) {
-            Common.sendMMMessage(player, message);
-        }
-        if (spectator) {
-            for (Player spectatorPlayer : spectators) {
-                Common.sendMMMessage(spectatorPlayer, message);
-            }
-        }
+        Common.sendMessage(players.keySet(), spectators, message, spectator);
     }
 
     private void teleportStuckSpectatorsAfterRollback() {

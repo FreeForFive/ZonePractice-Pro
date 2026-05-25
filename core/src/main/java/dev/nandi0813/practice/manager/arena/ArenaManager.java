@@ -17,13 +17,13 @@ import dev.nandi0813.practice.util.Cuboid;
 import dev.nandi0813.practice.util.StartUpCallback;
 import lombok.Getter;
 import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public class ArenaManager implements Listener {
@@ -37,7 +37,7 @@ public class ArenaManager implements Listener {
     }
 
     public static final boolean LOAD_CHUNKS = ConfigManager.getBoolean("ARENA.LOAD-CHUNKS");
-    public static final List<Chunk> LOADED_CHUNKS = new ArrayList<>();
+    public static final Set<Long> LOADED_CHUNK_KEYS = ConcurrentHashMap.newKeySet();
 
     private final List<DisplayArena> arenaList = new ArrayList<>();
     private final Map<Cuboid, BasicArena> arenaCuboids = new HashMap<>();

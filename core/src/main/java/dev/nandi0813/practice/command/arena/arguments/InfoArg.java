@@ -11,8 +11,9 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum InfoArg {
-    ;
+public final class InfoArg {
+
+    private InfoArg() {}
 
     public static void run(Player player, String label, String[] args) {
         if (!player.hasPermission("zpp.setup")) {
@@ -37,12 +38,13 @@ public enum InfoArg {
                     .replace("%arena%", arena.getName())
                     .replace("%type%", arena.getType().getName())
                     .replace("%icon%", arena.getIcon() != null ? LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.INFO.STATUS-NAMES.SET") : LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.INFO.STATUS-NAMES.NOT-SET"))
-                    .replace("%displayName%", StringUtil.legacyColorToMiniMessage(arena.getDisplayName()))
+                    .replace("%displayName%", arena.getDisplayName())
                     .replace("%ladders%", (ladderNames.isEmpty() ? StringUtil.CC("<red>NULL") : ladderNames.toString().replace("]", "").replace("[", "")))
                     .replace("%corner1%", ArenaUtil.convertLocation(arena.getCorner1()))
                     .replace("%corner2%", ArenaUtil.convertLocation(arena.getCorner2()))
                     .replace("%position1%", ArenaUtil.convertLocation(arena.getPosition1()))
                     .replace("%position2%", ArenaUtil.convertLocation(arena.getPosition2()))
+                    .replace("%partyFfaCenter%", ArenaUtil.convertLocation(arena.getPartyFfaCenter()))
                     .replace("%status%", arena.isEnabled() ? LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.INFO.STATUS-NAMES.ENABLED") : LanguageManager.getString("COMMAND.ARENA.ARGUMENTS.INFO.STATUS-NAMES.DISABLED"))
             );
         }

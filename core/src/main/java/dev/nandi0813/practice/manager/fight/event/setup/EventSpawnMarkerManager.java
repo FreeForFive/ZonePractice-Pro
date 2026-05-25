@@ -5,7 +5,6 @@ import dev.nandi0813.practice.manager.fight.event.interfaces.EventData;
 import dev.nandi0813.practice.util.Common;
 import dev.nandi0813.practice.util.ItemCreateUtil;
 import lombok.Getter;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
@@ -73,7 +72,7 @@ public class EventSpawnMarkerManager {
         if (!spawns.isEmpty()) {
             int index = 0;
             for (Location spawnLoc : spawns) {
-                Mannequin marker = createMarker(spawnLoc, "&c&lSpawn #" + (index + 1));
+                Mannequin marker = createMarker(spawnLoc, "<red><bold>Spawn #" + (index + 1));
                 if (marker != null) {
                     markers.add(marker);
                     // Track this main marker to its spawn index
@@ -110,7 +109,7 @@ public class EventSpawnMarkerManager {
         mannequin.setGravity(false);
         mannequin.setCanPickupItems(false);
         mannequin.setCustomNameVisible(true);
-        mannequin.customName(Component.text(Common.colorize(name)));
+        mannequin.customName(Common.deserializeMiniMessage(name));
         mannequin.setAI(false);
         mannequin.setCollidable(false);
         mannequin.setSilent(true);
@@ -123,7 +122,7 @@ public class EventSpawnMarkerManager {
         mannequin.teleport(facingLoc);
 
         // Give it a sword to hold (to make it more visible)
-        ItemStack sword = ItemCreateUtil.createItem("&cSpawn Marker", org.bukkit.Material.DIAMOND_SWORD);
+        ItemStack sword = ItemCreateUtil.createItem("<red>Spawn Marker", org.bukkit.Material.DIAMOND_SWORD);
         mannequin.getEquipment().setItemInMainHand(sword);
 
         // Make it invulnerable and non-persistent.
@@ -145,7 +144,7 @@ public class EventSpawnMarkerManager {
         labelStand.setGravity(false);
         labelStand.setCanPickupItems(false);
         labelStand.setCustomNameVisible(true);
-        labelStand.customName(Component.text(Common.colorize("&7(Right-click to remove)")));
+        labelStand.customName(Common.deserializeMiniMessage("<gray>(Right-click to remove)"));
         labelStand.setAI(false);
         labelStand.setCollidable(false);
         labelStand.setSilent(true);

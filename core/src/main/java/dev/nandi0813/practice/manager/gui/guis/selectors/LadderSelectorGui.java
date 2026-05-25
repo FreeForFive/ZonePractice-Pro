@@ -85,6 +85,9 @@ public class LadderSelectorGui extends GUI {
                     ItemStack icon = ItemCreateUtil.createItem(ladder.getIcon(), GUIFile.getString("GUIS.SELECTORS.LADDER-SELECTOR.ICONS.LADDER.NAME").replace("%ladder%", ladder.getDisplayName()), lore);
 
                     int slot = inventory.firstEmpty();
+                    if (slot == -1) {
+                        break;
+                    }
                     gui.get(1).setItem(slot, icon);
                     ladderSlots.put(slot, ladder);
                 }

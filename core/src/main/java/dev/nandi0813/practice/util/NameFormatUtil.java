@@ -12,13 +12,13 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.entity.Player;
 
-public enum NameFormatUtil {
-    ;
+public final class NameFormatUtil {
+
+    private NameFormatUtil() {}
 
     private static final PlainTextComponentSerializer PLAIN_TEXT_SERIALIZER = PlainTextComponentSerializer.plainText();
 
-    // ── Color helpers ────────────────────────────────────────────────────────
-
+    // Color helpers
     private static TextColor findFirstExplicitColor(Component component) {
         if (component == null) return null;
         if (component.color() != null) return component.color();
@@ -51,15 +51,10 @@ public enum NameFormatUtil {
         return findLastExplicitColor(component);
     }
 
-    // ── Template / placeholder helpers ──────────────────────────────────────
-
+    // Template / placeholder helpers
     public static Component parseConfiguredComponent(String raw) {
         if (raw == null || raw.isEmpty()) return Component.empty();
-        String normalized = raw;
-        if (normalized.contains("&") || normalized.contains("\u00A7")) {
-            normalized = StringUtil.legacyColorToMiniMessage(normalized);
-        }
-        return ZonePractice.getMiniMessage().deserialize(normalized);
+        return ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(raw));
     }
 
     public static Component applyDivisionPlaceholders(Component template, Profile profile) {
@@ -83,8 +78,10 @@ public enum NameFormatUtil {
 
     /**
      * Applies any PlaceholderAPI placeholders present in {@code component} by
-     * serialising to MiniMessage, running PAPI, translating legacy/hex color codes,
-     * then re-parsing.  Returns {@code component} unchanged if PAPI is not installed
+     * serialising to MiniMessage, running PAPI, then re-parsing.
+     * PAPI expansions may inject legacy {@code &} codes — these are converted
+     * to MiniMessage via the Adventure legacy serializer.
+     * Returns {@code component} unchanged if PAPI is not installed
      * or {@code player} is null.
      */
     public static Component applyPAPIPlaceholders(Component component, Player player) {
@@ -92,25 +89,19 @@ public enum NameFormatUtil {
         if (!SoftDependUtil.isPAPI_ENABLED) return component;
         String serialized = ZonePractice.getMiniMessage().serialize(component);
         String resolved   = PlaceholderAPI.setPlaceholders(player, serialized);
-        String translated = StringUtil.translateColorsToMiniMessage(resolved);
-        return ZonePractice.getMiniMessage().deserialize(translated);
+        return ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(resolved));
     }
 
     public static String normalizePlayerNameTemplate(String rawTemplate) {
         if (rawTemplate == null || rawTemplate.isEmpty()) return rawTemplate;
-        String normalized = rawTemplate;
-        if (normalized.contains("&") || normalized.contains("\u00A7")) {
-            normalized = StringUtil.legacyColorToMiniMessage(normalized);
-        }
-        boolean hasPlayerPlaceholder = normalized.contains("%player%") || normalized.contains("%%player%%");
+        boolean hasPlayerPlaceholder = rawTemplate.contains("%player%") || rawTemplate.contains("%%player%%");
         if (hasPlayerPlaceholder) return rawTemplate;
-        String plainText = PLAIN_TEXT_SERIALIZER.serialize(ZonePractice.getMiniMessage().deserialize(normalized)).trim();
+        String plainText = PLAIN_TEXT_SERIALIZER.serialize(ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(rawTemplate))).trim();
         if (!plainText.isEmpty()) return rawTemplate;
         return rawTemplate + "%player%";
     }
 
-    // ── Internal rendering ───────────────────────────────────────────────────
-
+    // Internal rendering
     private static Component renderTemplate(String rawTemplate, Profile profile, String playerName) {
         return renderTemplate(rawTemplate, profile, playerName, null);
     }
@@ -135,7 +126,7 @@ public enum NameFormatUtil {
             normalized = PlaceholderAPI.setPlaceholders(player, normalized);
         }
 
-        normalized = StringUtil.translateColorsToMiniMessage(normalized);
+        normalized = StringUtil.legacyToMiniMessage(normalized);
 
         String division = profile.getStats().getDivision() != null
                 ? ZonePractice.getMiniMessage().serialize(profile.getStats().getDivision().getComponentFullName()) : "";
@@ -153,8 +144,7 @@ public enum NameFormatUtil {
         return ZonePractice.getMiniMessage().deserialize(normalized);
     }
 
-    // ── Public resolution API ────────────────────────────────────────────────
-
+    // Public resolution API
     public static Component resolvePrefix(Profile profile) {
         return resolvePrefix(profile, null);
     }

@@ -53,7 +53,7 @@ public class PearlFight extends NormalLadder implements LadderHandle, TempBuild,
 
         if (match.getCurrentRound().getRoundStatus().equals(RoundStatus.LIVE)) {
             e.setDamage(0);
-            player.setHealth(20);
+            dev.nandi0813.practice.util.playerutil.PlayerUtil.healToMaxHealth(player);
         }
     }
 

@@ -4,6 +4,7 @@ import dev.nandi0813.practice.ZonePractice;
 import dev.nandi0813.practice.manager.arena.ArenaManager;
 import dev.nandi0813.practice.manager.arena.arenas.Arena;
 import dev.nandi0813.practice.manager.arena.arenas.FFAArena;
+import dev.nandi0813.practice.manager.backend.ConfigManager;
 import dev.nandi0813.practice.manager.backend.LanguageManager;
 import dev.nandi0813.practice.manager.backend.MysqlManager;
 import dev.nandi0813.practice.manager.fight.match.Match;
@@ -95,14 +96,16 @@ public enum LadderUtil {
         GUIManager.getInstance().searchGUI(GUIType.Queue_Ranked).update(true);
         GUIManager.getInstance().searchGUI(GUIType.CustomLadder_Selector).update();
 
-        Bukkit.getScheduler().runTaskAsynchronously(ZonePractice.getInstance(), () ->
-        {
-            for (Profile profile : ProfileManager.getInstance().getProfiles().values()) {
-                profile.getFile().deleteCustomKit(ladder);
-                profile.getUnrankedCustomKits().remove(ladder);
-                profile.getRankedCustomKits().remove(ladder);
-            }
-        });
+        if (!ConfigManager.getBoolean("SETUP.PRESERVE-CUSTOM-KITS-ON-LADDER-DISABLE")) {
+            Bukkit.getScheduler().runTaskAsynchronously(ZonePractice.getInstance(), () ->
+            {
+                for (Profile profile : ProfileManager.getInstance().getProfiles().values()) {
+                    profile.getFile().deleteCustomKit(ladder);
+                    profile.getUnrankedCustomKits().remove(ladder);
+                    profile.getRankedCustomKits().remove(ladder);
+                }
+            });
+        }
 
         /*
          * Delete the ladder statistics from the mysql table.

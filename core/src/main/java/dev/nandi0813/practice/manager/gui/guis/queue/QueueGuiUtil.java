@@ -35,7 +35,7 @@ public enum QueueGuiUtil {
         Matcher matcher = pattern.matcher(s);
 
         if (!matcher.matches()) {
-            return "&cInvalid format!";
+            return "<red>Invalid format!";
         }
 
         String lbType = matcher.group(1);
@@ -47,35 +47,35 @@ public enum QueueGuiUtil {
             lbSecondaryType = LbSecondaryType.valueOf(lbType.toUpperCase());
             placement = Integer.parseInt(number);
         } catch (Exception e) {
-            return "&cInvalid format!";
+            return "<red>Invalid format!";
         }
 
         Leaderboard leaderboard = LeaderboardManager.getInstance().searchLB(LbMainType.LADDER, lbSecondaryType, ladder);
         if (leaderboard == null) {
-            return "&cNo leaderboard found!";
+            return "<red>No leaderboard found!";
         }
 
         List<OfflinePlayer> players = new ArrayList<>(leaderboard.getList().keySet());
         if (players.size() < placement) {
-            return "&cNo player found!";
+            return "<red>No player found!";
         }
 
         OfflinePlayer player = players.get(placement - 1);
         Profile profile = ProfileManager.getInstance().getProfile(player);
 
-        Division division = null;
-        if (profile != null) {
-            division = profile.getStats().getDivision();
+        if (profile == null || player.getName() == null) {
+            return "<red>No player found!";
         }
-        
+
+        Division division = profile.getStats().getDivision();
         int score = leaderboard.getList().get(player);
 
         return format
                 .replace("%placement%", String.valueOf(placement))
                 .replace("%player%", player.getName())
                 .replace("%score%", String.valueOf(score))
-                .replace("%division%", division != null ? division.getFullName() : "&cN/A")
-                .replace("%division_short%", division != null ? division.getShortName() : "&cN/A");
+                .replace("%division%", division != null ? division.getFullName() : "<red>N/A")
+                .replace("%division_short%", division != null ? division.getShortName() : "<red>N/A");
     }
 
 }

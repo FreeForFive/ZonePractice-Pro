@@ -20,7 +20,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,6 +73,9 @@ public class LadderSingleGui extends GUI {
                     ladderItem = ArenaSetupUtil.getNonCompatibleLadderItem(ladder);
 
                 int slot = gui.get(1).firstEmpty();
+                if (slot == -1) {
+                    break;
+                }
                 gui.get(1).setItem(slot, ladderItem);
                 ladderSlots.put(slot, ladder.getName());
             }

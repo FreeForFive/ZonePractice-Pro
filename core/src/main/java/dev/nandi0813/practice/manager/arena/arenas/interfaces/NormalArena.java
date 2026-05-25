@@ -27,6 +27,9 @@ public abstract class NormalArena extends BasicArena implements DisplayName {
     protected PortalLocation portalLoc1;
     protected PortalLocation portalLoc2;
 
+    // Optional shared spawn point used by Party FFA style modes.
+    protected Location partyFfaCenter;
+
     protected NormalArena(String name) {
         super(name);
     }
@@ -105,6 +108,11 @@ public abstract class NormalArena extends BasicArena implements DisplayName {
             config.set(path + "portallocation.2", portalLoc2.getCenter());
         else
             config.set(path + "portallocation.2", null);
+
+        if (partyFfaCenter != null)
+            config.set(path + "party-ffa-center", partyFfaCenter);
+        else
+            config.set(path + "party-ffa-center", null);
     }
 
     public void getBasicData(YamlConfiguration config, String path) {
@@ -142,6 +150,9 @@ public abstract class NormalArena extends BasicArena implements DisplayName {
             portalLoc1 = new PortalLocation((Location) config.get(path + "portallocation.1"));
         if (config.get(path + "portallocation.2") != null)
             portalLoc2 = new PortalLocation((Location) config.get(path + "portallocation.2"));
+
+        if (config.get(path + "party-ffa-center") != null)
+            partyFfaCenter = (Location) config.get(path + "party-ffa-center");
     }
 
     public List<PortalLocation> getPortalLocations() {

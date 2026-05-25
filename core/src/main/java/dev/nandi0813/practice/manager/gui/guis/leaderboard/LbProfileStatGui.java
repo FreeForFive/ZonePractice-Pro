@@ -49,7 +49,9 @@ public class LbProfileStatGui extends GUI {
             for (NormalLadder ladder : LadderManager.getInstance().getLadders()) {
                 if (!ladder.isEnabled()) continue;
 
-                inventory.setItem(inventory.firstEmpty(), LbGuiUtil.createLadderStatItem(profile, ladder).get());
+                int slot = inventory.firstEmpty();
+                if (slot == -1) break;
+                inventory.setItem(slot, LbGuiUtil.createLadderStatItem(profile, ladder).get());
             }
 
             ItemStack fillerItem = GUIFile.getGuiItem("GUIS.STATISTICS.PLAYER-STATISTICS.ICONS.FILLER-ITEM").get();

@@ -1,6 +1,7 @@
 package dev.nandi0813.practice.command.arena.arguments;
 
 import dev.nandi0813.practice.command.arena.arguments.Set.IconArg;
+import dev.nandi0813.practice.command.arena.arguments.Set.PartyFfaCenterArg;
 import dev.nandi0813.practice.command.arena.arguments.Set.PortalProtArg;
 import dev.nandi0813.practice.command.arena.arguments.Set.SideBuildLimitArg;
 import org.bukkit.entity.Player;
@@ -10,8 +11,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public enum SetArg {
-    ;
+public final class SetArg {
+
+    private SetArg() {}
 
     public static void run(Player player, String label, String[] args) {
         if (args.length > 1) {
@@ -24,6 +26,9 @@ public enum SetArg {
                     break;
                 case "sidebuildlimit":
                     SideBuildLimitArg.run(player, label, args);
+                    break;
+                case "partyffacenter":
+                    PartyFfaCenterArg.run(player, label, args);
                     break;
             }
         } else
@@ -39,6 +44,7 @@ public enum SetArg {
             arguments.add("icon");
             arguments.add("portalprot");
             arguments.add("sidebuildlimit");
+            arguments.add("partyffacenter");
 
             StringUtil.copyPartialMatches(args[1], arguments, completion);
         } else if (args.length > 2) {
@@ -46,6 +52,7 @@ public enum SetArg {
                 case "icon" -> IconArg.tabComplete(player, args);
                 case "portalprot" -> PortalProtArg.tabComplete(player, args);
                 case "sidebuildlimit" -> SideBuildLimitArg.tabComplete(player, args);
+                case "partyffacenter" -> PartyFfaCenterArg.tabComplete(player, args);
                 default -> completion;
             };
         }

@@ -27,7 +27,7 @@ import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
-import static dev.nandi0813.practice.manager.arena.ArenaManager.LOADED_CHUNKS;
+import static dev.nandi0813.practice.manager.arena.ArenaManager.LOADED_CHUNK_KEYS;
 import static dev.nandi0813.practice.manager.arena.ArenaManager.LOAD_CHUNKS;
 
 public class ArenaListener implements Listener {
@@ -167,7 +167,8 @@ public class ArenaListener implements Listener {
     @EventHandler
     public void onChunkUnload(ChunkUnloadEvent e) {
         if (LOAD_CHUNKS) {
-            if (LOADED_CHUNKS.contains(e.getChunk())) {
+            long chunkKey = ArenaUtil.chunkKey(e.getChunk().getX(), e.getChunk().getZ());
+            if (LOADED_CHUNK_KEYS.contains(chunkKey)) {
                 // Use addPluginChunkTicket to force-keep the chunk loaded.
                 // This is safe from recursion (unlike getChunkAtAsync which can
                 // trigger chunk scheduling → more unloads → StackOverflowError).

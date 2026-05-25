@@ -1,5 +1,6 @@
 package dev.nandi0813.practice.command.ladder.arguments;
 
+import dev.nandi0813.practice.manager.backend.ConfigManager;
 import dev.nandi0813.practice.manager.backend.LanguageManager;
 import dev.nandi0813.practice.manager.fight.util.PlayerUtil;
 import dev.nandi0813.practice.manager.gui.GUIManager;
@@ -17,8 +18,9 @@ import org.bukkit.util.StringUtil;
 import java.util.ArrayList;
 import java.util.List;
 
-public enum IconArg {
-    ;
+public final class IconArg {
+
+    private IconArg() {}
 
     public static void run(Player player, String label, String[] args) {
         if (!player.hasPermission("zpp.setup")) {
@@ -37,7 +39,7 @@ public enum IconArg {
             return;
         }
 
-        if (ladder.isEnabled()) {
+        if (ladder.isEnabled() && !ConfigManager.getBoolean("SETUP.ALLOW-ICON-EDIT-WHILE-ENABLED")) {
             Common.sendMMMessage(player, LanguageManager.getString("COMMAND.LADDER.ARGUMENTS.ICON.LADDER-ENABLED").replace("%ladder%", ladder.getDisplayName()));
             return;
         }

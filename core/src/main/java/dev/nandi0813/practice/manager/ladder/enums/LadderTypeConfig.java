@@ -115,6 +115,7 @@ public class LadderTypeConfig {
                 SettingType.KNOCKBACK,
                 SettingType.WEIGHT_CLASS,
                 SettingType.ROUNDS,
+                SettingType.HEARTS,
                 SettingType.MAX_DURATION,
                 SettingType.START_COUNTDOWN,
                 SettingType.DROP_INVENTORY,

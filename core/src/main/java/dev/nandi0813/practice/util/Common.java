@@ -4,6 +4,7 @@ import dev.nandi0813.practice.ZonePractice;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import me.clip.placeholderapi.PlaceholderAPI;
+import dev.nandi0813.practice.manager.profile.Profile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -16,12 +17,14 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public enum Common {
-    ;
+public final class Common {
+
+    private Common() {}
 
     public static void send(CommandSender sender, Component component) {
         if (sender == null) return;
@@ -29,15 +32,7 @@ public enum Common {
     }
 
     public static void sendMMMessage(Player player, String line) {
-        if (line == null) {
-            return;
-        }
-
-        if (line.contains("&") || line.contains("§")) {
-            line = StringUtil.legacyColorToMiniMessage(line);
-        }
-
-        if (line.isEmpty()) {
+        if (line == null || line.isEmpty()) {
             return;
         }
 
@@ -45,15 +40,36 @@ public enum Common {
             line = PlaceholderAPI.setPlaceholders(player, line);
         }
 
-        send(player, ZonePractice.getMiniMessage().deserialize(line));
+        send(player, ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(line)));
     }
 
     public static void sendConsoleMMMessage(String string) {
-        send(ZonePractice.getInstance().getServer().getConsoleSender(), ZonePractice.getMiniMessage().deserialize(string));
+        send(ZonePractice.getInstance().getServer().getConsoleSender(), ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(string)));
+    }
+
+    public static void playDeathEffect(Profile killerProfile, org.bukkit.Location location, java.util.List<Player> viewers) {
+        try {
+            if (killerProfile == null || killerProfile.getCosmeticsData() == null) return;
+            var deathEffect = killerProfile.getCosmeticsData().getDeathEffect();
+            if (deathEffect == null) return;
+            deathEffect.play(location, viewers);
+        } catch (Exception ignored) {}
+    }
+
+    public static void sendMessage(Collection<? extends Player> players, Collection<? extends Player> spectators, String message, boolean includeSpectators) {
+        for (Player player : players) {
+            sendMMMessage(player, message);
+        }
+        if (includeSpectators) {
+            for (Player spectator : spectators) {
+                sendMMMessage(spectator, message);
+            }
+        }
     }
 
     public static Component deserializeMiniMessage(String line) {
-        return ZonePractice.getMiniMessage().deserialize(line);
+        if (line == null || line.isEmpty()) return Component.empty();
+        return ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(line));
     }
 
     public static String serializeComponentToLegacyString(Component component) {
@@ -61,35 +77,29 @@ public enum Common {
     }
 
     public static String mmToNormal(String line) {
-        if (line.contains("&") || line.contains("§")) {
-            line = StringUtil.legacyColorToMiniMessage(line);
-        }
-
         return StringUtil.CC(serializeComponentToLegacyString(deserializeMiniMessage(line)));
     }
 
     public static String serializeNormalToMMString(String normalString) {
-        String normalized = normalString.replace('&', LegacyComponentSerializer.SECTION_CHAR);
-        Component component = LegacyComponentSerializer.legacySection().deserialize(normalized);
-        return ZonePractice.getMiniMessage().serialize(component);
+        return StringUtil.legacyToMiniMessage(normalString);
     }
 
     public static String colorize(String message) {
-        return StringUtil.CC(message);
+        return serializeComponentToLegacyString(deserializeMiniMessage(message));
     }
 
     public static Component legacyToComponent(String message) {
         if (message == null) {
             return Component.empty();
         }
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(message);
+        return ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(message));
     }
 
     public static String stripLegacyColor(String message) {
         if (message == null || message.isEmpty()) {
             return "";
         }
-        Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(message);
+        Component component = ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(message));
         return PlainTextComponentSerializer.plainText().serialize(component);
     }
 
@@ -108,11 +118,25 @@ public enum Common {
         return serializeComponentToLegacyString(itemMeta.displayName());
     }
 
+    public static String getItemDisplayNameMiniMessage(ItemMeta itemMeta) {
+        if (itemMeta == null || !itemMeta.hasDisplayName() || itemMeta.displayName() == null) {
+            return "";
+        }
+        return ZonePractice.getMiniMessage().serialize(itemMeta.displayName());
+    }
+
     public static String getItemDisplayName(ItemStack itemStack) {
         if (itemStack == null || !itemStack.hasItemMeta()) {
             return "";
         }
         return getItemDisplayName(itemStack.getItemMeta());
+    }
+
+    public static String getItemDisplayNameMiniMessage(ItemStack itemStack) {
+        if (itemStack == null || !itemStack.hasItemMeta()) {
+            return "";
+        }
+        return getItemDisplayNameMiniMessage(itemStack.getItemMeta());
     }
 
     public static short getItemDamage(ItemStack itemStack) {

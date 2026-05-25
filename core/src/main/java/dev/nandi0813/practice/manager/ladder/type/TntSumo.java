@@ -352,7 +352,7 @@ public class TntSumo extends NormalLadder implements LadderHandle, TempBuild, Te
         }
 
         e.setDamage(0);
-        player.setHealth(20);
+        dev.nandi0813.practice.util.playerutil.PlayerUtil.healToMaxHealth(player);
     }
 
     private static void onPlayerMove(@NotNull PlayerMoveEvent e, @NotNull Match match) {
@@ -705,5 +705,4 @@ public class TntSumo extends NormalLadder implements LadderHandle, TempBuild, Te
         }
     }
 }
-
 
