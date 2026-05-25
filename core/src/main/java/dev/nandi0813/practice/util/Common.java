@@ -4,6 +4,7 @@ import dev.nandi0813.practice.ZonePractice;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
 import me.clip.placeholderapi.PlaceholderAPI;
+import dev.nandi0813.practice.manager.profile.Profile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -16,12 +17,14 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public enum Common {
-    ;
+public final class Common {
+
+    private Common() {}
 
     public static void send(CommandSender sender, Component component) {
         if (sender == null) return;
@@ -42,6 +45,26 @@ public enum Common {
 
     public static void sendConsoleMMMessage(String string) {
         send(ZonePractice.getInstance().getServer().getConsoleSender(), ZonePractice.getMiniMessage().deserialize(StringUtil.legacyToMiniMessage(string)));
+    }
+
+    public static void playDeathEffect(Profile killerProfile, org.bukkit.Location location, java.util.List<Player> viewers) {
+        try {
+            if (killerProfile == null || killerProfile.getCosmeticsData() == null) return;
+            var deathEffect = killerProfile.getCosmeticsData().getDeathEffect();
+            if (deathEffect == null) return;
+            deathEffect.play(location, viewers);
+        } catch (Exception ignored) {}
+    }
+
+    public static void sendMessage(Collection<? extends Player> players, Collection<? extends Player> spectators, String message, boolean includeSpectators) {
+        for (Player player : players) {
+            sendMMMessage(player, message);
+        }
+        if (includeSpectators) {
+            for (Player spectator : spectators) {
+                sendMMMessage(spectator, message);
+            }
+        }
     }
 
     public static Component deserializeMiniMessage(String line) {
