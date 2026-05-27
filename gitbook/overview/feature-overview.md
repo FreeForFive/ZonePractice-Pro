@@ -39,8 +39,8 @@
 ## Admin and moderation
 
 - Setup manager GUI (`/setup`)
-- Staff mode (`/staff`) with vanish, fly, staff chat, force end, follow
-- Extended `/practice` admin subcommands: `lobby`, `arenas`, `teleport`, `info`, `rename`, `elo`, `ranked`, `unranked`, `exp`, `reset`, `nametag`, `reload`, `hologram`, `stop`
+- Staff mode (`/staff`) with vanish, fly, staff chat, force end, stop
+- Extended `/practice` admin subcommands: `lobby`, `arenas`, `teleport`, `info`, `rename`, `elo`, `ranked`, `unranked`, `exp`, `reset`, `nametag`, `reload`, `hologram`
 - Queue ignore toggle (`/ignorequeue <player>`)
 - OP bypass controls per-feature in config
 - Auto-save with configurable interval

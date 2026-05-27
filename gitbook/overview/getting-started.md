@@ -6,7 +6,7 @@ This page is a beginner-safe checklist. Follow it in order, and do not skip step
 
 You need:
 
-- A Paper server (1.21.11 or 26.1.2)
+- A supported Paper server version (1.21.x or 26.x)
 - Java 25
 - `PacketEvents` 2.x plugin installed in `plugins/`
 
@@ -97,5 +97,5 @@ If players cannot use normal features:
 If plugin disables on startup:
 
 - Check Java version (requires Java 25)
-- Check your server version (1.21.11 or 26.1.2 — see [Compatibility Notes](../extra/modern-version-support-informations.md))
+- Check your server version (supported: 1.21.x or 26.x — see [Compatibility Notes](../extra/modern-version-support-informations.md))
 - Check that PacketEvents 2.x is in your plugins folder and loaded

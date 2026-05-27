@@ -34,7 +34,7 @@ Grant `zpp.group.default` to regular players for access to basic features.
 | `zpp.practice.exp` | | Manage player experience |
 | `zpp.practice.rename` | | Use `/practice rename` |
 | `zpp.practice.reload` | | Reload config files |
-| `zpp.practice.stop` | | Stop all matches |
+| `zpp.practice.stop` | | Legacy permission node (currently no `/practice stop` subcommand) |
 | `zpp.practice.reset` | | Fully reset a player |
 | `zpp.practice.nametag.set` | | Set player's nametag |
 | `zpp.practice.nametag.reset` | | Reset player's nametag |
@@ -95,7 +95,7 @@ Grant `zpp.group.default` to regular players for access to basic features.
 
 | Permission | Default | Description |
 | --- | --- | --- |
-| `zpp.settings.*` | | Opens + all settings toggles + bypass cooldown |
+| `zpp.settings.*` | | Opens + all settings toggles (does not grant `zpp.bypass.cooldown`) |
 | `zpp.settings.open` | true | Open settings GUI |
 | `zpp.settings.duelrequest` | | Toggle duel requests |
 | `zpp.settings.scoreboard` | | Toggle scoreboard |

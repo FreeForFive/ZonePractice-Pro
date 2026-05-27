@@ -74,7 +74,7 @@ api.addPlayerRanked(player, 3);
 api.endMatch(player, "Match ended by addon");
 
 // Statistics
-int elo = api.getElo(player, "Nodebuff");
+int elo = api.getElo(player, "Archer");
 int exp = api.getExperience(player);
 int wins = api.getLadderWins(player, "Nodebuff", WeightClass.RANKED);
 int losses = api.getLadderLosses(player, "Nodebuff", WeightClass.UNRANKED);
@@ -87,7 +87,7 @@ PlayerNametag nametag = api.getPlayerNametag(player);
 
 ## API events
 
-All events are in the `com.github.zonedevelopement.zonepracticepro.api.events` package:
+API event classes are under the `dev.nandi0813.api.Event` namespace:
 
 | Event | Cancellable | Description |
 | --- | --- | --- |

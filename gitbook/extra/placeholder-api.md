@@ -15,10 +15,10 @@ So `%zpp_x%` and `%zppro_x%` both work.
 
 | Placeholder | Description |
 | --- | --- |
-| `%zpp_in_queue%` | Whether player is in any queue |
-| `%zpp_in_queue_<ladder>%` | Whether player is in queue for a specific ladder |
-| `%zpp_in_fight%` | Whether player is in a match |
-| `%zpp_in_fight_<ladder>%` | Whether player is in a match for a specific ladder |
+| `%zpp_in_queue%` | Total players currently in queue |
+| `%zpp_in_queue_<ladder>%` | Queue size for a specific ladder |
+| `%zpp_in_fight%` | Total players currently in matches |
+| `%zpp_in_fight_<ladder>%` | Players currently in matches for a specific ladder |
 
 ## Group placeholders
 
@@ -95,12 +95,3 @@ Per ladder:
 | Placeholder | Description |
 | --- | --- |
 | `%zpp_nametag_color%` | MiniMessage color tag (e.g. `<red>`) based on match team or lobby nametag |
-
-## Kill/death streak placeholders
-
-| Placeholder | Description |
-| --- | --- |
-| `%zpp_kill_streak%` | Current kill streak |
-| `%zpp_best_kill_streak%` | Best ever kill streak |
-| `%zpp_death_streak%` | Current death streak |
-| `%zpp_best_death_streak%` | Best ever death streak |

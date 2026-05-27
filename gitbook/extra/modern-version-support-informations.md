@@ -4,8 +4,8 @@
 
 Current runtime version detection accepts:
 
-- `1.21.11`
-- `26.1.2`
+- `1.21.x`
+- `26.x`
 
 ZonePractice disables itself automatically on unsupported versions.
 

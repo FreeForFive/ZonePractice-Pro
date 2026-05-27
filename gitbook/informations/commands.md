@@ -11,7 +11,7 @@ This page documents all current commands, aliases, and major subcommands.
 | `/arena` | | Arena management | subcommand-based |
 | `/ladder` | | Ladder management | subcommand-based |
 | `/event` | `e` | Event setup/host/join/stop | subcommand-based |
-| `/staff` | `staffmode` | Staff mode (vanish, chat, force end, follow) | `zpp.staff` |
+| `/staff` | `staffmode` | Staff tools (enable/vanish/chat/stop/forceend) | mixed |
 | `/settings` | | Player settings GUI | default |
 
 ## Player queue and match commands
@@ -55,7 +55,7 @@ These are registered only when enabled in `config.yml`:
 | Subcommand | Description |
 | --- | --- |
 | `lobby set` | Set the lobby spawn location |
-| `lobby load` | Teleport to the lobby |
+| `lobby load` | Load lobby inventory items |
 | `arenas` | Teleport to arenas world |
 | `teleport <world>` | Teleport to a world |
 | `rename <name>` | Rename held item |
@@ -81,7 +81,6 @@ These are registered only when enabled in `config.yml`:
 | `hologram list` | List all holograms |
 | `hologram delete <name>` | Delete a hologram |
 | `reload` | Reload configuration files |
-| `stop` | Stop all matches |
 
 ## Important `/arena` subcommands
 
@@ -156,9 +155,8 @@ These are registered only when enabled in `config.yml`:
 | Subcommand | Description |
 | --- | --- |
 | `enable` | Enable staff mode |
-| `disable` | Disable staff mode |
 | `chat` | Toggle staff chat |
-| `follow <player>` | Follow a player |
+| `follow <player>` | Currently not implemented (returns a "not a feature" message) |
 | `vanish` | Toggle vanish |
 | `help` | View staff command help |
 | `stop <player>` | Stop a player's match |
