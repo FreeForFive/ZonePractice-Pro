@@ -16,6 +16,8 @@ public final class VersionChecker {
     private VersionChecker() {}
 
     private static volatile BukkitVersion bukkitVersion;
+    private static final String SUPPORTED_1_21 = "1.21.11";
+    private static final String SUPPORTED_26 = "26.1.2";
 
     // Matches strings like "(MC: 1.8.8)" or "(MC: 1.21)"
     private static final Pattern MC_VERSION_PATTERN = Pattern.compile("\\(MC: ([0-9]+\\.[0-9]+(?:\\.[0-9]+)?)\\)");
@@ -37,11 +39,11 @@ public final class VersionChecker {
                         return null;
                     }
 
-                    if (mcVersion.startsWith("1.21")) {
+                    if (SUPPORTED_1_21.equals(mcVersion)) {
                         bukkitVersion = BukkitVersion.v1_21_R3;
                     }
-                    else if (mcVersion.startsWith("26")) {
-                        bukkitVersion = BukkitVersion.v_26_1_R1;
+                    else if (SUPPORTED_26.equals(mcVersion)) {
+                        bukkitVersion = BukkitVersion.v_26_1_R2;
                     }
                     else {
                         ZonePractice.getInstance().getLogger().warning("Unsupported MC version: " + mcVersion);
@@ -63,7 +65,7 @@ public final class VersionChecker {
     @Getter
     public enum BukkitVersion {
         v1_21_R3, // 1.21.11
-        v_26_1_R1, // 26.1
+        v_26_1_R2, // 26.1.2
     }
 
 }
