@@ -1,4 +1,4 @@
-VERSION: 60
+VERSION: 61
 
 # Mysql database setup.
 MYSQL-DATABASE:
@@ -672,6 +672,7 @@ PLAYER:
   NAMETAG-MANAGEMENT:
     ENABLED: true # If false, ZonePractice will not manage nametags (above-head prefix/suffix/color) or the tab-list at all.
   JOIN-TELEPORT-LOBBY: true # If true, the player will be teleported to the lobby when they join the server.
+  JOIN-MESSAGE: true # If true, the default Minecraft join message will be shown when a player joins.
   GROUP-CHAT:
     ENABLED: true # If enabled, the player's chat will be formatted by their group. It is only viable if "SERVER-CHAT" is also enabled.
   DEFAULT-SETTINGS:
