@@ -307,7 +307,7 @@ MATCH-SETTINGS:
       SECONDS: 0 # Cooldown in seconds for using golden apples. Default is 0 seconds (no cooldown).
   FIREBALL-FIGHT: # These are multiplier values, so please test what is optimal for you and don't change them too much at once or the difference will multiply.
     FIREBALL-SPEED: 1.0
-    FIREBALL-YIELD: 1.8
+    FIREBALL-YIELD: 2.8
     EXPLOSION:
       TNT:
         HORIZONTAL: 1.4
